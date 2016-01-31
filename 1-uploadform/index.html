@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head lang="de">
+    <meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Resumable File Upload</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+	
+	<style>
+		.filename, .filetype, .filesize, .fileactions {display: inline-block}
+		.filename {width: 45%}
+		.filesize {width: 15%}
+		.filetype {width: 15%}
+		.fileactions {width: 25%; text-align:right; margin-bottom: 3px}
+		.fileprogress {margin-bottom: 4px}
+		.fileprogressbar.progress-bar {text-align: right!important}
+	</style>
+</head>
+<body>
+<div class="container" style="padding-top: 100px;">
+    <div class="row">
+		<noscript>
+		<div class="alert alert-danger">
+			<h3>Diese Seite benötigt JavaScript &ndash; bitte aktivere es!</h3>
+		</div>
+		</noscript>
+		<div id="notSupported" class="alert alert-danger hide fade">
+			<h3>Browser wird nicht unterstützt</h3>
+			Dein Browser bietet nicht die notwendigen Funktionen, um diese Upload-Seite zu nutzen. Bitte probiere es mit Firefox oder Chrome.
+		</div>
+        <div class="col-sm-12">
+            <div class="page-header">
+                <h1>Resumable file upload<small> <br/>with Resumable.js and Resumable.php</small></h1>
+            </div>
+        </div>
+ 
+        <div class="col-sm-12">
+            <button type="button" class="btn btn-info" aria-label="Add file" id="add-file-btn">
+                <span class="glyphicon glyphicon-file" aria-hidden="true"></span>&nbsp;
+				<span class="text">Datei auswählen</span>
+            </button>
+            <button type="button" class="btn btn-success pull-right" aria-label="Start upload" id="start-upload-btn">
+                <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>&nbsp;
+				<span class="text">Upload starten</span>
+            </button>
+            <button type="button" class="btn btn-default pull-right hide" aria-label="Pause upload" id="pause-upload-btn" style="margin-right: 6px">
+                <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>&nbsp;
+				<span class="text">Pausieren</span>
+            </button>
+        </div>
+			
+		<div class="col-sm-12">
+			<div class="alert alert-warning hide" id="nothingToUpload">
+				<strong>Wo nichts ist, kann auch nicht's werden.</strong> Bitte wähle erst eine Datei aus, die hochgeladen werden soll.
+			</div>
+			<div id="dropzone" class="dropzone text-muted text-center" style="border:3px dashed gray; border-radius: 12px; padding: 24px; margin: 18px 4px">
+				<h1 style="margin:0">Drag & Drop here</h1>
+			</div>
+        </div>
+ 
+		<div class="col-sm-12">
+			<ul class="list-group" id="file-list">
+				<li class="list-group-item">
+					<div class="filename">Dateiname</div><div class="filesize">Größe</div><div class="filetype">Typ</div><div class="fileactions"></div>
+				</li>
+			</ul>
+        </div>
+    </div>
+ 
+</div>
+ 
+<script src="https://code.jquery.com/jquery-1.12.0.min.js" type="application/javascript"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="application/javascript"></script>
+<script src="resumable.js" type="application/javascript"></script>
+<script src="index.js" type="application/javascript"></script>
+</body>
+</html>
