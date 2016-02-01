@@ -24,7 +24,7 @@ ToDo: Sanity checks, userTargetDir, senden von mails, sammeln von Informationen 
         $target_file = $target_dir . basename($_FILES["toUpload"]["name"]);
         $fileType = pathinfo($target_file,PATHINFO_EXTENSION);
         //for convert
-        $final_dir = "video/" . basename($_FILES["toUpload"]["name"]);
+        $final_dir = "video/test/";
 
         //sanity checks
         if ($fileType != "mp4") {
@@ -57,7 +57,7 @@ ToDo: Sanity checks, userTargetDir, senden von mails, sammeln von Informationen 
         if ($fileUploaded == 1) {
             //output muss in datei geschrieben werden, sonst wartet php bis skript zu ende ist
             exec ("./convert.sh $target_file $final_dir > temp/" . basename($_FILES["toUpload"]["name"]) . ".log");
-            echo "Das Video wird konvertiert und im Ordner /video gespeichert.";
+            echo "Das Video wird konvertiert und im Ordner $final_dir gespeichert.";
         }
     }
 ?>

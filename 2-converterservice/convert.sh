@@ -1,34 +1,96 @@
+#!/usr/bin/env bash
 # Dieses Konvertierungsskript konvertiert eine .mp4 Datei in die drei Formate
 # .mp4, .webm, .ogv sowohl in einer HD-Variante als auch in einer kleineren
 # (640x360) Variante
 #
 # Als Argumente nimmt es zuerst den Pfad zur Quelldatei ($1) und dann den Pfad
-# zur Zieldatei ($2)
+# zum Zielordner ($2)
+#
+# Script created by Lars Gröber, 01.02.2016
 #
 # ToDo: Fehlermeldungen, parallel-Support, sanity-checks
 
-filename=$1
+input_file=$1
 target_dir=$2
-echo "Konvertierung gestartet"
+target_file=${target_dir}$(basename $input_file)
+err=0
+echo -e "Input: "$1" "$2"\n"
+
+#1) SANITY-CHECKS
+
+echo "checking..."
+#Do all packages exist?
+if (! dpkg -l ffmpeg > /dev/null ); then
+  echo "Package ffmpeg is not installed! -- ABORT"
+  exit 1
+else
+  echo "Package ffmpeg is installed -- OK"
+fi
+if (! dpkg -l ffmpeg2theora > /dev/null ); then
+  echo "Package ffmpeg2theora is not installed! -- ABORT"
+  exit 1
+else
+  echo "Package ffmpeg2theora is installed -- OK"
+fi
+#Does input_file exists?
+if [ ! -e $input_file ]; then
+  echo "File does not exist! -- ABORT"
+  exit 1
+else
+  echo "Inputfile exist -- OK"
+fi
+#Can script read input_file?
+if [ ! -r $input_file ]; then
+  echo "Cannot read file! -- ABORT"
+  exit 1
+else
+  echo "Can read Inputfile -- OK"
+fi
+#Can script write to target_dir?
+if [ ! -w $target_dir ]; then
+  echo "Cannot write to target-directory! -- ABORT"
+  exit 1
+else
+  echo "Can write to target-directory -- OK"
+fi
+echo -e "checking done \n"
+
+#2) Start converting
+
+echo -e "CONVERTING START: `date +%c` \n"
+
+# Full-HD versions
+ffmpeg -i $input_file -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 ${target_file}.webm &
+
+ffmpeg -i $input_file -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22  ${target_file}.mp4 &
+
+ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --frontend -o ${target_file}.ogv &
 
 
-# Full-HD Versionen
-ffmpeg -i $filename -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 ${target_dir}.webm
-echo "webm Konvertierung beendet"
-ffmpeg -i $filename -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22  ${target_dir}.mp4
-echo "mp4 Konvertierung beendet"
-ffmpeg2theora $filename --videoquality 8 --audioquality 6 --frontend -o ${target_dir}.ogv
-echo "ogv Konvertierung beendet"
+# Small (640x360) versions
+ffmpeg -i $input_file -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22 -s 640x360  ${target_file}.small.mp4 &
 
-# Small (640x360) Versionen
-ffmpeg -i $filename -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22 -s 640x360  ${target_dir}.small.mp4
-echo "mp4-small Konvertierung beendet"
-ffmpeg -i $filename -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 -s 640x360  ${target_dir}.small.webm
-echo "webm-small Konvertierung beendet"
-ffmpeg2theora $filename --videoquality 8 --audioquality 6 --width 640  --frontend -o ${target_dir}.small.ogv
-echo "ogv-small Konvertierung beendet"
+ffmpeg -i $input_file -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 -s 640x360  ${target_file}.small.webm &
+
+ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --width 640  --frontend -o ${target_file}.small.ogv &
+
 
 wait
 
-echo "Konvertierung beendet"
-exit 0
+#3) Check if all files exist
+
+#array of all fileextensions
+fileTypes=(".webm" ".mp4" ".ogv" ".small.webm" ".small.mp4" ".small.ogv")
+
+echo -e "\n""checking files:"
+for (( i=0;i<${#fileTypes[@]};i++ )); do
+    if [ -e ${target_file}${fileTypes[${i}]} ]; then
+      echo ${fileTypes[${i}]}" converting successful"
+    else
+      echo ${fileTypes[${i}]}" converting NOT successful, file does not exist -- ERROR"
+      err+=1
+    fi
+done
+
+echo -e "\n""CONVERTING END: `date +%c`"
+exit $err
