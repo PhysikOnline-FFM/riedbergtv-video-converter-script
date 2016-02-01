@@ -7,13 +7,30 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
 	
 	<style>
-		.filename, .filetype, .filesize, .fileactions {display: inline-block}
-		.filename {width: 45%}
-		.filesize {width: 15%}
-		.filetype {width: 15%}
-		.fileactions {width: 25%; text-align:right; margin-bottom: 3px}
-		.fileprogress {margin-bottom: 4px}
-		.fileprogressbar.progress-bar {text-align: right!important}
+		.filename, .filetype, .filesize, .fileactions{display: inline-block}
+		.filename{width: 45%}
+		.filesize{width: 15%}
+		.filetype{width: 15%}
+		.fileactions{width: 25%; text-align:right; margin-bottom: 3px}
+		.fileprogress{margin-bottom: 4px}
+		.fileprogressbar .progress-bar{text-align: right!important; padding: 0 4px;}
+		.highlightDropzone{
+			-webkit-box-shadow: inset 0px 0px 30px 0px rgb(91,192,222);
+			-moz-box-shadow: inset 0px 0px 30px 0px rgb(91,192,222);
+			box-shadow: inset 0px 0px 30px 0px rgb(91,192,222);
+			
+			-webkit-transition: all 0.4s ease-in-out;
+			transition: all 0.4s ease-in-out;
+		}
+		.targetDropzone{
+			-webkit-box-shadow: inset 0px 0px 30px 0px rgba(92,184,92,1);
+			-moz-box-shadow: inset 0px 0px 30px 0px rgba(92,184,92,1);
+			box-shadow: inset 0px 0px 30px 0px rgba(92,184,92,1);
+			background-color: rgba(92,184,92, 0.1);
+			
+			-webkit-transition: all 0.4s ease-in-out;
+			transition: all 0.4s ease-in-out;
+		}
 	</style>
 </head>
 <body>
@@ -28,6 +45,7 @@
 			<h3>Browser wird nicht unterstützt</h3>
 			Dein Browser bietet nicht die notwendigen Funktionen, um diese Upload-Seite zu nutzen. Bitte probiere es mit Firefox oder Chrome.
 		</div>
+		
         <div class="col-sm-12">
             <div class="page-header">
                 <h1>Resumable file upload<small> <br/>with Resumable.js and Resumable.php</small></h1>
@@ -50,15 +68,15 @@
         </div>
 			
 		<div class="col-sm-12">
-			<div class="alert alert-warning hide" id="nothingToUpload">
-				<strong>Wo nichts ist, kann auch nicht's werden.</strong> Bitte wähle erst eine Datei aus, die hochgeladen werden soll.
-			</div>
 			<div id="dropzone" class="dropzone text-muted text-center" style="border:3px dashed gray; border-radius: 12px; padding: 24px; margin: 18px 4px">
 				<h1 style="margin:0">Drag & Drop here</h1>
 			</div>
         </div>
  
 		<div class="col-sm-12">
+			<div class="alert alert-warning hide" id="nothingToUpload">
+				<strong>Wo nichts ist, kann auch nicht's werden.</strong> Bitte wähle erst eine Datei aus, die hochgeladen werden soll.
+			</div>
 			<ul class="list-group" id="file-list">
 				<li class="list-group-item">
 					<div class="filename">Dateiname</div><div class="filesize">Größe</div><div class="filetype">Typ</div><div class="fileactions"></div>

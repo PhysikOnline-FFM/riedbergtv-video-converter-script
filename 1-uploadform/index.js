@@ -23,7 +23,7 @@ $( document ).ready(function() {
         } 
 		else {
 			$('#nothingToUpload').removeClass('hide');
-			setTimeout(function(){$('#nothingToUpload').addClass('hide')}, 3500);
+			setTimeout(function(){$('#nothingToUpload').addClass('hide')}, 4000);
         }
     });
  
@@ -35,7 +35,23 @@ $( document ).ready(function() {
             return r.upload();
         }
     });
- 
+	
+	/*
+	* Drag & Drop Events
+	*/
+	$(document).on('drop dragover', function (e){
+		e.preventDefault();
+	});
+	$(document).on('dragover', function (e){
+		$('#dropzone').addClass('highlightDropzone');
+	})
+	$('#dropzone').on('dragover', function (e){
+		$('#dropzone').addClass('targetDropzone');
+	});
+	$(document, '#dropzone').on('dragleave drop', function (e){
+		$('#dropzone').removeClass('highlightDropzone').removeClass('targetDropzone');
+	})
+	
 	/*
 	* Resumable.JS Events
 	*/
