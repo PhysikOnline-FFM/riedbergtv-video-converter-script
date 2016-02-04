@@ -1,4 +1,14 @@
 <?php
+/*
+	TODO::
+	- check file type
+	- add .mp4 Extension
+	- whitelist for POST['filetarpath'] (!!! important)
+	- use POST['filetarpath']  and POST['filename'] to move and rename file after uploading
+	- remove old folders of unsecussful upload attempts (low prio)
+
+*/
+
 require_once('vendor/autoload.php');
 
 use Cake\Filesystem\File; 

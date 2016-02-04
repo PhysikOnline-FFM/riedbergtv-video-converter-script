@@ -1,10 +1,45 @@
+var catSelectOptions = {'Interview (Physik)':'physik/interviews/', 'Interview (Biologie)':'biologie/interviews/'}; // !!! Ist nur zur Demonstration, muss unbedingt serverseitig validiert werden.
+
 $( document ).ready(function() {
-    var r = new Resumable({
-        target: 'upload.php',
-        testChunks: true,
+	var showAlert = function(title, text, cssClass='alert-info', parent){
+		if (parent === undefined) parent = '#sharedAlertContainerFiles';
+		// Create Alert Box
+		var $alert = $('<div class="alert">').addClass(cssClass);
+		// Fill with content
+		$alert.append($('<strong>').html(title)).append($('<span>').html(' '+text));
+		// Show it in parent container
+		$(parent).prepend($alert);
+		// Automatic removement
+		setTimeout(function(){
+			$alert.remove();
+		}, 6000);
+	},
+		formatSize = function(size){
+        if(size<1024){return size + ' bytes'} 
+		else if(size<1024*1024){return (size/1024.0).toFixed(0) + ' KB'}
+		else if(size<1024*1024*1024){return (size/1024.0/1024.0).toFixed(1) + ' MB'} 
+		else {return (size/1024.0/1024.0/1024.0).toFixed(1) + ' GB'}
+    },
+		r = new Resumable({
+        target: 'upload.php',		// target url to server script
+        testChunks: true,			// Check if chunk has uploaded already before
 		chunkSize: 4*1024*1024,
 		simultaneousUploads: 2,
-		query: {}, //Extra parameters to include in the multipart POST with data. This can be an object or a function. If a function, it will be passed a ResumableFile object
+		query: function(file){
+			var $li = $('li#' + file.uniqueIdentifier),
+				$inp_target = $li.find('.filetarpath select'),
+				$inp_filename = $li.find('.filename input');
+				
+			return {'filetarpath':$inp_target.val(), 'filename':$inp_filename.val()};
+		}, 	//Extra parameters to include in the multipart POST with data. This can be an object or a function. If a function, it will be passed a ResumableFile object
+		minFileSize: 500*1024, 	// 500KB+
+		minFileSizeErrorCallback:function(file, errorCount) {
+			showAlert('Minimalgröße unterschritten', 'Die Datei "'+ (file.fileName||file.name) +'" ist zu klein. Videodateien werden größer als ' + formatSize(r.getOpt('minFileSize')) + ' erwartet.', 'alert-danger');
+		},
+		fileType: ['mp4'], 		// allowed file extensions
+		fileTypeErrorCallback: function(file, errorCount) {
+			showAlert('Unerlaubter Dateityp', 'Die Datei "'+ (file.fileName||file.name) +'" hat einen falschen Dateityp. Es können nur ' + r.getOpt('fileType') + '-Dateien hochgeladen werden.', 'alert-danger');
+      }
     });
  
     r.assignBrowse(document.getElementById('add-file-btn'));
@@ -18,21 +53,30 @@ $( document ).ready(function() {
 	*/
     $('#start-upload-btn').click(function(e){
 		if (r.files.length > 0){
-			$('#pause-upload-btn').removeClass('hide');
-			r.upload();
-        } 
-		else {
-			$('#nothingToUpload').removeClass('hide');
-			setTimeout(function(){$('#nothingToUpload').addClass('hide')}, 4000);
-        }
+			var errors = 0,
+				$inputs = $('#file-list input, #file-list select');
+				
+			$inputs.each(function(){
+				$(this).parent().removeClass('has-error');
+				if (!$(this).val()){
+					$(this).parent().addClass('has-error');
+					errors++;
+				}
+			});
+			if (!errors)
+				r.upload();
+			else
+				showAlert('Fehlende Angaben', 'Vor dem Upload müssen alle Felder ausgefüllt/-wählt werden.', 'alert-danger');
+		}
+		else
+			showAlert('Wo nichts ist, kann auch nicht\'s werden.', 'Bitte wähle erst eine Datei aus, die hochgeladen werden soll.', 'alert-warning');
     });
- 
     $('#pause-upload-btn').click(function(){
         if (r.files.length>0) {
-            if (r.isUploading()) {
+            if (r.isUploading())
 				return r.pause();
-            }
-            return r.upload();
+			else
+				return r.upload();
         }
     });
 	
@@ -59,20 +103,26 @@ $( document ).ready(function() {
         //progressBar.fileAdded();
 		var $template = 
 			$('<li class="list-group-item" id="'+file.uniqueIdentifier+'">' +
-				'<div class="filename">'+file.fileName+'</div>' +
-				'<div class="filesize">'+filesize(file.size)+'</div>' +
+				'<div class="filetarpath"><select name="filetarpath" class="form-control"><option value="">Auswählen!</option></select></div>' +
+				'<div class="filename"><input type="text" name="filename" class="form-control" value="'+(file.fileName.substr(0, file.fileName.lastIndexOf('.')) || file.fileName)+'" /></div>' +
 				'<div class="filetype">'+file.file.type+'</div>' +
-				'<div class="fileactions"><button class="btn btn-danger btn-sm rm"><span class="glyphicon glyphicon-trash"></span></button></div>' +
+				'<div class="filesize">'+formatSize(file.size)+'</div>' +
+				'<div class="fileactions"><button class="btn btn-danger btn-sm rm"><span class="glyphicon glyphicon-remove"></span></button></div>' +
 				'<div class="progress fileprogressbar"><div class="progress-bar" role="progressbar" style="width: 0%;"></div>' +
 				'</div></li>');
-		// remove from list
+		// remove from list button
 		$template.find('.btn.rm').click(function(e){
 			var parent = $(this).parent().parent(),
 				identifier = parent.attr('id'),
 				file = r.getFromUniqueIdentifier(identifier);
 			r.removeFile(file);
 			parent.remove();
-		});		
+		});	
+		// add Targetpath options
+		var $select = $template.find('.filetarpath select');
+		$.each(catSelectOptions, function(k,v){
+			$select.append('<option value="'+v+'">'+k+'</option>');
+		});
 		$('#file-list').append($template);
     });
 	
@@ -82,6 +132,7 @@ $( document ).ready(function() {
 	
 	r.on('fileError', function(file, message){
 		$('li#' + file.uniqueIdentifier).find('.progress-bar').addClass('progress-bar-danger').css('width', '100%').css('color','white').html(message);
+		showAlert('Uploadfehler', 'Beim Hochladen von Datei "'+(file.fileName||file.name)+'" ist ein Fehler aufgetreten: <pre>'+message+'</pre>', 'alert-danger');
 	});
 	
 	r.on('fileProgress', function (file) {
@@ -92,18 +143,15 @@ $( document ).ready(function() {
     r.on('progress', function(){
         $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-play').addClass('glyphicon-pause');
 		$('#pause-upload-btn').find('.text').text('Pausieren');
+		$('#pause-upload-btn').removeClass('hide');
+		$('#file-list input').prop('readonly', true);
+		$('#file-list select').prop('disabled', true);
     });
  
     r.on('pause', function(){
         $('#pause-upload-btn').find('.glyphicon').removeClass('glyphicon-pause').addClass('glyphicon-play');
 		$('#pause-upload-btn').find('.text').text('Fortsetzen');
+		$('#file-list input').prop('readonly', false);
+		$('#file-list select').prop('disabled', false);
     });
 });
-
-/*
- 2016 
- http://cdn.filesizejs.com/filesize.min.js
- @version 3.2.1
- */
-"use strict";!function(a){function b(a){var b=arguments.length<=1||void 0===arguments[1]?{}:arguments[1],e=[],f=0,g=void 0,h=void 0,i=void 0,j=void 0,k=void 0,l=void 0,m=void 0,n=void 0,o=void 0,p=void 0,q=void 0;if(isNaN(a))throw new Error("Invalid arguments");return i=b.bits===!0,o=b.unix===!0,h=b.base||2,n=void 0!==b.round?b.round:o?1:2,p=void 0!==b.spacer?b.spacer:o?"":" ",q=b.symbols||b.suffixes||{},m=b.output||"string",g=void 0!==b.exponent?b.exponent:-1,l=Number(a),k=0>l,j=h>2?1e3:1024,k&&(l=-l),0===l?(e[0]=0,e[1]=o?"":i?"b":"B"):((-1===g||isNaN(g))&&(g=Math.floor(Math.log(l)/Math.log(j)),0>g&&(g=0)),g>8&&(g=8),f=2===h?l/Math.pow(2,10*g):l/Math.pow(1e3,g),i&&(f=8*f,f>j&&8>g&&(f/=j,g++)),e[0]=Number(f.toFixed(g>0?n:0)),e[1]=10===h&&1===g?i?"kb":"kB":d[i?"bits":"bytes"][g],o&&(e[1]=e[1].charAt(0),c.test(e[1])&&(e[0]=Math.floor(e[0]),e[1]=""))),k&&(e[0]=-e[0]),e[1]=q[e[1]]||e[1],"array"===m?e:"exponent"===m?g:"object"===m?{value:e[0],suffix:e[1],symbol:e[1]}:e.join(p)}var c=/^(b|B)$/,d={bits:["b","Kb","Mb","Gb","Tb","Pb","Eb","Zb","Yb"],bytes:["B","KB","MB","GB","TB","PB","EB","ZB","YB"]};"undefined"!=typeof exports?module.exports=b:"function"==typeof define&&define.amd?define(function(){return b}):a.filesize=b}("undefined"!=typeof window?window:global);
-//# sourceMappingURL=filesize.min.js.map
