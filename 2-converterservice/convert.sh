@@ -14,7 +14,7 @@ input_file=$1
 target_dir=$2
 target_file=${target_dir}$(basename $input_file)
 err=0
-echo -e "Input: "$1" "$2"\n"
+echo -e "Input: "$@"\n"
 
 #1) SANITY-CHECKS
 
@@ -46,6 +46,13 @@ if [ ! -r $input_file ]; then
 else
   echo "Can read Inputfile -- OK"
 fi
+#Does target_dir exist?
+if [ ! -e $target_dir ]; then
+  echo "Target-directory does not exist! -- ABORT"
+  exit 1
+else
+  echo "Target-directory exists -- OK"
+fi
 #Can script write to target_dir?
 if [ ! -w $target_dir ]; then
   echo "Cannot write to target-directory! -- ABORT"
@@ -54,6 +61,11 @@ else
   echo "Can write to target-directory -- OK"
 fi
 echo -e "checking done \n"
+
+#sanity mode, just check
+if [ $3 == "--sanity" ]; then
+  exit 0
+fi
 
 #2) Start converting
 
