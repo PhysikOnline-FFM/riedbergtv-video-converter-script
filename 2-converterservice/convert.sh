@@ -14,7 +14,7 @@ input_file=$1
 target_dir=$2
 target_file=${target_dir}$(basename $input_file)
 err=0
-echo -e "Input: "$@"\n"
+echo -e "Input: "$@
 
 #1) SANITY-CHECKS
 
@@ -72,11 +72,11 @@ fi
 echo -e "CONVERTING START: `date +%c` \n"
 
 # Full-HD versions
-ffmpeg -i $input_file -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 ${target_file}.webm &
+#ffmpeg -i $input_file -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 ${target_file}.webm &
 
-ffmpeg -i $input_file -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22  ${target_file}.mp4 &
+#ffmpeg -i $input_file -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22  ${target_file}.mp4 &
 
-ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --frontend -o ${target_file}.ogv &
+#ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --frontend -o ${target_file}.ogv &
 
 
 # Small (640x360) versions

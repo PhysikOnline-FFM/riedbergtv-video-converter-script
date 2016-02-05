@@ -5,14 +5,14 @@
     <a href="Intro_RiedbergTv.mp4">zum testen</a><br>
     <input type="file" name="toUpload" id="toUpload">
     <br>
-    <!-- <input type="text" value="" name="userTargetDir"> -->
-    <input type="submit" value="upload und überprüfen" name="upload">
+    <!--  -->
+    <input type="submit" value="upload" name="upload">
 
 
 <?php
 /*
 Wichtig: Benutzer www-data muss vollen Zugriff auf alle benötigten Dateien und Ordner haben
-ToDo: Sanity checks, userTargetDir, senden von mails, sammeln von Informationen über script, ($_SESSION)
+ToDo: security! , userTargetDir, senden von mails, sammeln von Informationen über script,
 */
     //Define all variables
     //for upload
@@ -20,7 +20,7 @@ ToDo: Sanity checks, userTargetDir, senden von mails, sammeln von Informationen 
     $temp_dir = "temp/";
     $uploadOk = 1;
     $fileUploaded = 0;
-    $log_dir = "logs/";
+
 
     //UPLOAD
     //upload file to $_SESSION['target_file']
@@ -28,10 +28,11 @@ ToDo: Sanity checks, userTargetDir, senden von mails, sammeln von Informationen 
 
         $_SESSION['basename'] = basename($_FILES["toUpload"]["name"]);
         $_SESSION['target_file'] = $temp_dir . $_SESSION['basename'];
+
         $fileType = pathinfo($_SESSION['target_file'],PATHINFO_EXTENSION);
         //for convert
 
-        $_SESSION["final_dir"] = "video/test/";
+
 
         //sanity checks
         if ($fileType != "mp4") {
@@ -60,30 +61,49 @@ ToDo: Sanity checks, userTargetDir, senden von mails, sammeln von Informationen 
             }
         }
 
-        //CONVERT
-        //When user uploaded video start convert process
-        if ($fileUploaded == 1) {
-          //are there any immediate errors?
-          $output = array();
-          $return = 0;
-          exec("./convert.sh " . $_SESSION['target_file'] . " " . $_SESSION['final_dir'] . " --sanity", $output, $return);
-          if ($return != 0) {
-            echo "Es gibt Fehler: <br>";
-            foreach ($output as $i) {
-              echo "$i <br>";
-            }
-            session_unset();
-          }
-          else {
-            echo '<input type="submit" value="konvertieren" name="convert">';
-          }
 
+        //When video is uploaded, make user enter further information
+        if ($fileUploaded == 1) {
+          echo '<input type="text" value="email" name="userMail"> <br>
+                <input type="text" value="video/test/" name="userTargetDir"> <br>
+                <input type="submit" value="überprüfen und konvertieren" name="convert">';
         }
     }
+    //CONVERT
     if (isset($_POST["convert"])) {
-      //output muss in datei geschrieben werden, sonst wartet php bis skript zu ende ist
-      exec ("./convert.sh " . $_SESSION['target_file'] . " " . $_SESSION['final_dir'] . " > $log_dir" . $_SESSION['basename'] . ".log");
-      echo "Das Video wird konvertiert und im Ordner " . $_SESSION['final_dir'] . " gespeichert.";
+
+      //IMPORTANT: improve security!
+      $log_dir = "logs/";
+      $final_dir = $_POST["userTargetDir"];
+      $mail = ($_POST["userMail"] == "email" ? "lars@groeber-hg.de" : $_POST["userMail"]);
+      //command to convert video and save output in file:
+      $convert_cmd = "./convert.sh ".$_SESSION['target_file']." $final_dir";
+      $log_file = $log_dir . $_SESSION['basename'] . ".log";
+
+      //are there any immediate errors?
+      $output = array();
+      $return = 0;
+      exec($convert_cmd . " --sanity", $output, $return);
+      if ($return != 0) {
+        echo "Es gibt Fehler: <br>";
+        print_r($output);
+        session_unset();
+        die();
+      }
+
+      echo "Das Video wird konvertiert und im Ordner $final_dir gespeichert. <br>";
+      $pid = shell_exec ($convert_cmd . " > " . $log_file . " & echo $!");
+      $pid = trim($pid);
+
+
+      //start notification.php to send mail
+      if ($pid == null) {
+        die("Skript pid Nummer nicht gefunden!");
+      }
+
+      $notification_cmf = "php notification.php '$pid' '$mail' '$log_file' &";
+      shell_exec($notification_cmf);
+      echo "Dir wird eine E-Mail ($mail) zugeschickt, sobald die Konvertierung abgeschlossen ist.";
     }
 ?>
 </form>
