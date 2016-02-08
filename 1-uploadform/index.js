@@ -1,7 +1,8 @@
-var catSelectOptions = {'Interview (Physik)':'physik/interviews/', 'Interview (Biologie)':'biologie/interviews/'}; // !!! Ist nur zur Demonstration, muss unbedingt serverseitig validiert werden.
-
 $( document ).ready(function() {
-	var showAlert = function(title, text, cssClass='alert-info', parent){
+	
+	var allowed_filetarpathes = {},
+	upload_url = 'upload.php',
+	showAlert = function(title, text, cssClass='alert-info', parent){
 		if (parent === undefined) parent = '#sharedAlertContainerFiles';
 		// Create Alert Box
 		var $alert = $('<div class="alert">').addClass(cssClass);
@@ -14,14 +15,14 @@ $( document ).ready(function() {
 			$alert.remove();
 		}, 6000);
 	},
-		formatSize = function(size){
+	formatSize = function(size){
         if(size<1024){return size + ' bytes'} 
 		else if(size<1024*1024){return (size/1024.0).toFixed(0) + ' KB'}
 		else if(size<1024*1024*1024){return (size/1024.0/1024.0).toFixed(1) + ' MB'} 
 		else {return (size/1024.0/1024.0/1024.0).toFixed(1) + ' GB'}
     },
-		r = new Resumable({
-        target: 'upload.php',		// target url to server script
+	r = new Resumable({
+        target: upload_url,			// target url to server script
         testChunks: true,			// Check if chunk has uploaded already before
 		chunkSize: 4*1024*1024,
 		simultaneousUploads: 2,
@@ -53,20 +54,32 @@ $( document ).ready(function() {
 	*/
     $('#start-upload-btn').click(function(e){
 		if (r.files.length > 0){
-			var errors = 0,
+			var errors = {'inputs':0, 'mime':0},
 				$inputs = $('#file-list input, #file-list select');
-				
+			// Fehlende Angaben
 			$inputs.each(function(){
 				$(this).parent().removeClass('has-error');
 				if (!$(this).val()){
 					$(this).parent().addClass('has-error');
-					errors++;
+					errors.inputs++;
 				}
 			});
-			if (!errors)
+			// Falscher MimeType
+			$('ul#file-list li .filetype').removeClass('text-danger');
+			$.each(r.files, function(k, file){
+				if (file.file.type !== 'video/mp4'){
+					$('li#' + file.uniqueIdentifier).find('.filetype').addClass('text-danger');
+					errors.mime++;
+				}
+			});
+			if (errors.inputs === 0 && errors.mime === 0)
 				r.upload();
-			else
-				showAlert('Fehlende Angaben', 'Vor dem Upload müssen alle Felder ausgefüllt/-wählt werden.', 'alert-danger');
+			else {
+				if (errors.inputs !== 0)
+					showAlert('Fehlende Angaben', 'Vor dem Upload müssen alle Felder ausgefüllt/-wählt werden.', 'alert-danger');
+				if (errors.mime !== 0)
+					showAlert('Falscher Dateityp', 'Er dürfen nur MP4-Videos hochgeladen werden.', 'alert-danger');
+			} 
 		}
 		else
 			showAlert('Wo nichts ist, kann auch nicht\'s werden.', 'Bitte wähle erst eine Datei aus, die hochgeladen werden soll.', 'alert-warning');
@@ -104,7 +117,9 @@ $( document ).ready(function() {
 		var $template = 
 			$('<li class="list-group-item" id="'+file.uniqueIdentifier+'">' +
 				'<div class="filetarpath"><select name="filetarpath" class="form-control"><option value="">Auswählen!</option></select></div>' +
-				'<div class="filename"><input type="text" name="filename" class="form-control" value="'+(file.fileName.substr(0, file.fileName.lastIndexOf('.')) || file.fileName)+'" /></div>' +
+				'<div class="filename"><input type="text" name="filename" class="form-control" value="'
+					+(file.fileName.substr(0, file.fileName.lastIndexOf('.')) || file.fileName).replace(/[^-0-9A-Z_\.]+/i, '_')
+					+'" maxlength="255" /></div>' +
 				'<div class="filetype">'+file.file.type+'</div>' +
 				'<div class="filesize">'+formatSize(file.size)+'</div>' +
 				'<div class="fileactions"><button class="btn btn-danger btn-sm rm"><span class="glyphicon glyphicon-remove"></span></button></div>' +
@@ -120,7 +135,7 @@ $( document ).ready(function() {
 		});	
 		// add Targetpath options
 		var $select = $template.find('.filetarpath select');
-		$.each(catSelectOptions, function(k,v){
+		$.each(allowed_filetarpathes, function(k,v){
 			$select.append('<option value="'+v+'">'+k+'</option>');
 		});
 		$('#file-list').append($template);
@@ -154,4 +169,10 @@ $( document ).ready(function() {
 		$('#file-list input').prop('readonly', false);
 		$('#file-list select').prop('disabled', false);
     });
+	
+	// Request allowed_filetarpathes
+	$.ajax({url: upload_url + '?allowed_filetarpathes',}).done(function(data) {
+		//if ( console && console.log ) {console.log(data);}
+		allowed_filetarpathes = data;
+	});
 });
