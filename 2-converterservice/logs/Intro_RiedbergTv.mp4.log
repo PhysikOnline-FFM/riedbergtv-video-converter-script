@@ -1,15 +1,10 @@
-Input: temp/Intro_RiedbergTv.mp4 video/test/
+Diese Email wurde dir zugeschickt, da du ein Video auf riedberg.tv hochgeladen und
+konvertiert hast, sollte dies nicht der Fall gewesen sein, ignoriere diese Mail.
 
-checking...
-Package ffmpeg is installed -- OK
-Package ffmpeg2theora is installed -- OK
-Inputfile exist -- OK
-Can read Inputfile -- OK
-Target-directory exists -- OK
-Can write to target-directory -- OK
-checking done 
+Output des Konvertierungsskript, wichtig: am Ende werden die Dateien getested:
 
-CONVERTING START: Sat Feb  6 00:54:01 2016 
+
+CONVERTING START: Tue Feb  9 21:45:51 2016 
 
 {"duration": 5.056000, "position": 0.00, "audio_kbps":  0, "video_kbps": 0, "remaining": 0.00}
 {"duration": 5.056000, "position": 0.77, "audio_kbps":  0, "video_kbps": 40, "remaining": 33.53}
@@ -20,13 +15,22 @@ CONVERTING START: Sat Feb  6 00:54:01 2016
 
 {"duration": 5.056000, "position": 5.06, "audio_kbps":  0, "video_kbps": 112, "remaining": 0.00}
 {"result": "ok"}
+{"duration": 5.056000, "position": 0.00, "audio_kbps":  0, "video_kbps": 0, "remaining": 0.00}
+{"duration": 5.056000, "position": 1.27, "audio_kbps":  0, "video_kbps": 114, "remaining": 95.60}
+{"duration": 5.056000, "position": 1.80, "audio_kbps":  0, "video_kbps": 376, "remaining": 57.79}
+{"duration": 5.056000, "position": 2.34, "audio_kbps":  0, "video_kbps": 733, "remaining": 37.27}
+{"duration": 5.056000, "position": 4.30, "audio_kbps":  0, "video_kbps": 527, "remaining": 5.59}
+{"duration": 5.056000, "position": 4.84, "audio_kbps":  0, "video_kbps": 469, "remaining": 1.44}
+
+{"duration": 5.056000, "position": 5.06, "audio_kbps":  0, "video_kbps": 469, "remaining": 0.00}
+{"result": "ok"}
+
+CONVERTING END: Tue Feb  9 21:46:23 2016
 
 checking files:
-.webm converting NOT successful, file does not exist -- ERROR
-.mp4 converting NOT successful, file does not exist -- ERROR
-.ogv converting NOT successful, file does not exist -- ERROR
+.webm converting successful
+.mp4 converting successful
+.ogv converting successful
 .small.webm converting successful
 .small.mp4 converting successful
 .small.ogv converting successful
-
-CONVERTING END: Sat Feb  6 00:54:07 2016

@@ -10,9 +10,10 @@
 
 
 <?php
+
 /*
 Wichtig: Benutzer www-data muss vollen Zugriff auf alle benötigten Dateien und Ordner haben
-ToDo: security! , userTargetDir, senden von mails, sammeln von Informationen über script,
+ToDo: thumbnails
 */
     //Define all variables
     //for upload
@@ -26,7 +27,7 @@ ToDo: security! , userTargetDir, senden von mails, sammeln von Informationen üb
     //upload file to $_SESSION['target_file']
     if (isset($_POST["upload"]) && $fileUploaded == 0){
 
-        $_SESSION['basename'] = basename($_FILES["toUpload"]["name"]);
+        $_SESSION['basename'] = input_sec(basename($_FILES["toUpload"]["name"]));
         $_SESSION['target_file'] = $temp_dir . $_SESSION['basename'];
 
         $fileType = pathinfo($_SESSION['target_file'],PATHINFO_EXTENSION);
@@ -69,41 +70,64 @@ ToDo: security! , userTargetDir, senden von mails, sammeln von Informationen üb
                 <input type="submit" value="überprüfen und konvertieren" name="convert">';
         }
     }
+
     //CONVERT
     if (isset($_POST["convert"])) {
-
-      //IMPORTANT: improve security!
+      //log-Directory used to store output from convert.sh
       $log_dir = "logs/";
-      $final_dir = $_POST["userTargetDir"];
-      $mail = ($_POST["userMail"] == "email" ? "lars@groeber-hg.de" : $_POST["userMail"]);
-      //command to convert video and save output in file:
-      $convert_cmd = "./convert.sh ".$_SESSION['target_file']." $final_dir";
       $log_file = $log_dir . $_SESSION['basename'] . ".log";
+      //file that needs to be converted
+      $video_file = $_SESSION['target_file'];
+      //directory used to store converted files
+      $final_dir = input_sec($_POST["userTargetDir"]);
+      //file with content for mail
+      $beginn_file = $log_dir . "/_beginn.log";
+      //mailaddress used to send notification
+      $mail = ($_POST["userMail"] == "email" ? "lars@groeber-hg.de" : input_sec($_POST["userMail"]));
+
+      //command to convert video and save output in file:
+      $check_cmd = "./check.sh $video_file $final_dir";
+      $convert_cmd = "./convert.sh $video_file $final_dir >> $log_file &";
+      //$start_cmd = "./start_convert.sh $video_file $final_dir $log_file";
+      //copy content of beginn_file to new log_file for later use
+      copy($beginn_file, $log_file);
 
       //are there any immediate errors?
       $output = array();
       $return = 0;
-      exec($convert_cmd . " --sanity", $output, $return);
+      exec($check_cmd, $output, $return);
       if ($return != 0) {
-        echo "Es gibt Fehler: <br>";
+        echo "Es gibt Fehler, kontaktiere einen Administrator, wenn du nicht weißt, woran es liegt: <br>";
         print_r($output);
         session_unset();
         die();
       }
 
       echo "Das Video wird konvertiert und im Ordner $final_dir gespeichert. <br>";
-      $pid = shell_exec ($convert_cmd . " > " . $log_file . " & echo $!");
-      $pid = trim($pid);
+      exec ($convert_cmd);
+      sleep(1);
+      //convert.sh needs to store own process id in file pid
+      $pid = trim(file_get_contents("pid"));
+      //echo $pid."<br>";
 
-
-      //start notification.php to send mail
-      if ($pid == null) {
+      if ($pid == null || $pid == "") {
         die("Skript pid Nummer nicht gefunden!");
       }
-
-      $notification_cmf = "php notification.php '$pid' '$mail' '$log_file' &";
-      shell_exec($notification_cmf);
+      //start notification.php to send mail
+      $notification_cmd = "php notification.php '$pid' '$mail' '$log_file' > $log_dir/_debugNotification.log 2>&1 &";
+      exec($notification_cmd);
       echo "Dir wird eine E-Mail ($mail) zugeschickt, sobald die Konvertierung abgeschlossen ist.";
+      session_unset();
     }
+
+    function input_sec($data) {
+      $data = htmlspecialchars($data);
+      $data = trim($data);
+      $data = stripslashes($data);
+      escapeshellarg($data);
+      return $data;
+    }
+
+
 ?>
 </form>
