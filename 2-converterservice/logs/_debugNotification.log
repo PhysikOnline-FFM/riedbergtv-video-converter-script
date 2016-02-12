@@ -2,7 +2,7 @@ Dies sind die verwendeten Argumente:
 Array
 (
     [0] => notification.php
-    [1] => 23466
+    [1] => 31276
     [2] => lars@groeber-hg.de
     [3] => logs/Intro_RiedbergTv.mp4.log
 )
@@ -12,4 +12,5 @@ Skript is running for 15 Seconds
 Skript is running for 20 Seconds 
 Skript is running for 25 Seconds 
 Skript is running for 30 Seconds 
+Skript is running for 35 Seconds 
 Skript is not running 

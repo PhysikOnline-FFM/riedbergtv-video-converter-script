@@ -3,8 +3,7 @@ konvertiert hast, sollte dies nicht der Fall gewesen sein, ignoriere diese Mail.
 
 Output des Konvertierungsskript, wichtig: am Ende werden die Dateien getested:
 
-
-CONVERTING START: Tue Feb  9 21:45:51 2016 
+CONVERTING START: Fri Feb 12 14:23:06 2016 
 
 {"duration": 5.056000, "position": 0.00, "audio_kbps":  0, "video_kbps": 0, "remaining": 0.00}
 {"duration": 5.056000, "position": 0.77, "audio_kbps":  0, "video_kbps": 40, "remaining": 33.53}
@@ -25,7 +24,7 @@ CONVERTING START: Tue Feb  9 21:45:51 2016
 {"duration": 5.056000, "position": 5.06, "audio_kbps":  0, "video_kbps": 469, "remaining": 0.00}
 {"result": "ok"}
 
-CONVERTING END: Tue Feb  9 21:46:23 2016
+CONVERTING END: Fri Feb 12 14:23:38 2016
 
 checking files:
 .webm converting successful
