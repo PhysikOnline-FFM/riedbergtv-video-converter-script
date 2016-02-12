@@ -3,7 +3,6 @@
 	TODO::
 	- check file type
 	- remove old folders of unsecussful upload attempts (low prio)
-
 */
 
 require_once('vendor/autoload.php');
@@ -18,6 +17,8 @@ use Dilab\Resumable;
 // The benefit is that we have not to change the original source code (Y).
 class RTVResumable extends Resumable {
 	
+	protected $returnData = null;
+
 	public static $allowed_filetarpathes = array(
 		'Campus Riedberg' => 'campus/riedberg/', 
 		'Interview (Biologie)' => 'interviews/biologie/', 
@@ -39,8 +40,7 @@ class RTVResumable extends Resumable {
 		$get = $this->request->data('get');
 		if (!empty($get)) {
 			if (isset($get['allowed_filetarpathes'])){
-				header('Content-Type: application/json');
-				echo json_encode(self::$allowed_filetarpathes);
+				$this->echoJson(self::$allowed_filetarpathes);
 				exit();
 			}
 		}
@@ -48,22 +48,31 @@ class RTVResumable extends Resumable {
 		$this->process(); // parent process
 		
 		$this->pruneChunks(true); # on a random base. Other option is to implement a cron script
+
+		if (isset($this->returnData)){
+			$this->echoJson($this->returnData);
+		}
+	}
+
+	public function echoJson($data){
+		header('Content-Type: application/json');
+		echo json_encode($data);
 	}
 	
 	# This is the thing we want to change, because we want to define the destination folder by POST parameter
 	# here also an email could been sent to the person
 	public function handleChunk(){
-        $file = $this->request->file();
-        $identifier = $this->resumableParam('identifier');
-        $filename = $this->resumableParam('filename');
-        $chunkNumber = $this->resumableParam('chunkNumber');
-        $chunkSize = $this->resumableParam('chunkSize');
-        $totalSize = $this->resumableParam('totalSize');
+		$file = $this->request->file();
+		$identifier = $this->resumableParam('identifier');
+		$filename = $this->resumableParam('filename');
+		$chunkNumber = $this->resumableParam('chunkNumber');
+		$chunkSize = $this->resumableParam('chunkSize');
+		$totalSize = $this->resumableParam('totalSize');
 
-        if (!$this->isChunkUploaded($identifier, $filename, $chunkNumber)) {
-            $chunkFile = $this->tmpChunkDir($identifier) . DIRECTORY_SEPARATOR . $this->tmpChunkFilename($filename, $chunkNumber);
-            $this->moveUploadedFile($file['tmp_name'], $chunkFile);
-        }
+		if (!$this->isChunkUploaded($identifier, $filename, $chunkNumber)) {
+			$chunkFile = $this->tmpChunkDir($identifier) . DIRECTORY_SEPARATOR . $this->tmpChunkFilename($filename, $chunkNumber);
+			$this->moveUploadedFile($file['tmp_name'], $chunkFile);
+		}
 
         if ($this->isFileUploadComplete($filename, $identifier, $chunkSize, $totalSize)) {
 			
@@ -78,8 +87,9 @@ class RTVResumable extends Resumable {
 			$new_filename = pathinfo($new_filename, PATHINFO_FILENAME);
 			# Trim
 			$new_filename = trim($new_filename);
+			$subfolder4video = date("Y-m-d") . '_' . substr($new_filename, 0, 25);
 			# Make sure there is a filename
-			$new_filename = date("Y-m-d") .'_'. $new_filename;
+			//$new_filename = date("Y-m-d") .'_'. $new_filename;
 			# Add mp4 always
 			$new_filename .= '.mp4';
 			
@@ -88,9 +98,24 @@ class RTVResumable extends Resumable {
 				$new_target_dir = $this->uploadFolder . DIRECTORY_SEPARATOR . $post['filetarpath'];
 			else
 				$new_target_dir = $this->uploadFolder . DIRECTORY_SEPARATOR . 'forbidden_tarpath/';
-			
+			// Erstelle Unterordner für das Video
+			$new_target_dir = $new_target_dir . $subfolder4video . DIRECTORY_SEPARATOR;
+
 			// Erzeuge zusammengesetzte Datei und nutze neuen Dateiname
-            $this->createFileAndDeleteTmp($identifier, $new_filename, $new_target_dir);
+			$filepathname = $new_target_dir . $new_filename;
+            $this->createFileAndDeleteTmp($identifier, $filepathname);
+
+			// Konvertierungsskript starten
+			$mail = 'elearning@th.physik.uni-frankfurt.de';
+			$logfile = $new_target_dir . $subfolder4video . '.log';
+			$cmd = "./convert.sh '$filepathname' '$new_target_dir' '$mail' '$logfile' > '$logfile' &";
+			$ret = exec($cmd);
+			// debug $this->returnData = array($cmd, $ret); 
+			
+			// info an Nutzer
+			mail($mail, "Upload abgeschlossen & Konvertierung gestartet", 
+						"Der Upload ist abgeschlossen. Die Datei wurde in \"$filepathname'\" gespeichert und die Konvertierung gestartet. " 
+						+"Sobald diese abgeschlossen ist, erhältst du das vollständige Log-File.");
         }
 
         return $this->response->header(200);
@@ -98,10 +123,10 @@ class RTVResumable extends Resumable {
 	
 	# We need this function here, because Resumable did declare it private, 
 	# but it has also been changed for our purposes
-	protected function createFileAndDeleteTmp($identifier, $filename, $dirname){
+	protected function createFileAndDeleteTmp($identifier, $filepathname){
         $tmpFolder = new Folder($this->tmpChunkDir($identifier));
         $chunkFiles = $tmpFolder->read(true, true, true)[1];
-        if ($this->createFileFromChunks($chunkFiles, $dirname . $filename) 
+        if ($this->createFileFromChunks($chunkFiles, $filepathname) 
 			&& $this->deleteTmpFolder) {
             $tmpFolder->delete();
         }
@@ -132,8 +157,10 @@ class RTVResumable extends Resumable {
 				$path = $chunksFolder . DIRECTORY_SEPARATOR . $entry;
 				if (is_dir($path)){
 					# I decided to step into dir recursively to remove also files inside.
-					# TODO:: The dir itself will not be deleted this way, but it needs approximately no space, so it is ok for me at this time.
 					$this->pruneChunks(true, $expirationTime, $path); #continue;
+					try {
+					    (new Folder($path))->delete();
+					} catch (Exception $e) {}
 				}
 				elseif (time() - filemtime($path) > $expirationTime)
 					unlink($path);

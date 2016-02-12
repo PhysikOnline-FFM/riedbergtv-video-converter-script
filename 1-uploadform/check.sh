@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
+
 input_file=$1
 target_dir=$2
 target_file=${target_dir}$(basename $input_file)
-
 
 #SANITY-CHECKS
 echo "checking..."
@@ -39,4 +39,5 @@ if [ ! -w $target_dir ]; then
   exit 1
 fi
 echo -e "checking done, no errors \n"
+
 exit 0
