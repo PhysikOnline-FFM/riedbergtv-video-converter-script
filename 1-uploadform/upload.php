@@ -79,6 +79,7 @@ class RTVResumable extends Resumable {
 			// Sicherheitsaspekte nach http://php.net/manual/de/function.move-uploaded-file.php
 			$post = $this->request->data('post'); # $post['filename'] is different to $this->resumableParam('filename'); !!
 			
+			$new_filename = isset($post['filename']) ? $post['filename'] : substr(uniqid(),0,15);
 			# Replace unallowed characters from filename string
 			$new_filename = preg_replace("`[^-0-9A-Z_\.]+`i", '_', $post['filename']); 
 			# Limit filename length
@@ -89,8 +90,8 @@ class RTVResumable extends Resumable {
 			$new_filename = trim($new_filename);
 			$subfolder4video = date("Y-m-d") . '_' . substr($new_filename, 0, 25);
 			# Make sure there is a filename
-			//$new_filename = date("Y-m-d") .'_'. $new_filename;
-			# Add mp4 always
+			if (strlen($new_filename) < 3) $new_filename = date("Y-m-d") .'_'. $new_filename;
+			# Add mp4 extension always
 			$new_filename .= '.mp4';
 			
 			// Bestimme den Zielpfad
@@ -106,14 +107,14 @@ class RTVResumable extends Resumable {
             $this->createFileAndDeleteTmp($identifier, $filepathname);
 
 			// Konvertierungsskript starten
-			$mail = 'elearning@th.physik.uni-frankfurt.de';
+			$mail = isset($post['email']) ? escapeshellarg(trim(strip_tags($post['email']))) : 'elearning@th.physik.uni-frankfurt.de';
 			$logfile = $new_target_dir . $subfolder4video . '.log';
 			$cmd = "./convert.sh '$filepathname' '$new_target_dir' '$mail' '$logfile' > '$logfile' &";
 			$ret = exec($cmd);
 			// debug $this->returnData = array($cmd, $ret); 
 			
 			// info an Nutzer
-			mail($mail, "Upload abgeschlossen & Konvertierung gestartet", 
+			mail($mail, "[riedberg.tv] Upload abgeschlossen & Konvertierung gestartet", 
 						"Der Upload ist abgeschlossen. Die Datei wurde in \"$filepathname'\" gespeichert und die Konvertierung gestartet. " 
 						+"Sobald diese abgeschlossen ist, erhältst du das vollständige Log-File.");
         }

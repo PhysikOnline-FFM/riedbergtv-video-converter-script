@@ -25,7 +25,7 @@ $logFile_open = fopen($logFile, "r") or die("Unable to open $logFile!");
 
 //send mail
 $mail_content = $beginn_mail . fread($logFile_open, filesize($logFile));
-mail ($mail, "Konvertierung abgeschlossen", $mail_content);
+mail ($mail, "[riedberg.tv] Konvertierung abgeschlossen", $mail_content);
 
 //close logFile
 fclose($logFile_open);
