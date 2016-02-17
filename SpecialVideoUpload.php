@@ -20,13 +20,11 @@ class SpecialVideoUpload extends SpecialPage {
 			$this->displayRestrictionError();
 			return;
 		}
-		
-		$output->addModules('ext.RtvVideoUpload');
+		$output->addModuleStyles('ext.RtvVideoUpload');
+		$output->addModuleScripts('ext.RtvVideoUpload');
 		
 		# diese Texte werden angezeigt, sobald der Benutzer eingeloggt
 		# die Spezialseite besucht:
-		
-		$output->addHTML("<p>Um herauszufinden, was man mit diesen Objekten so machen kann, siehe die MediaWiki class reference: <a href='https://doc.wikimedia.org/mediawiki-core/master/php/classSpecialPage.html'>SpecialPage</a> und von dort zB. <a href='https://doc.wikimedia.org/mediawiki-core/master/php/classOutputPage.html'>OutputPage</a>, <a href='https://doc.wikimedia.org/mediawiki-core/master/php/classWebRequest.html'>WebRequest</a>.");
 
 		# wir koennen hier auf alle moeglichen Objekte zugreifen.
 		$user = $this->getUser();
@@ -68,7 +66,7 @@ class SpecialVideoUpload extends SpecialPage {
 		</div>
 	</div>
 
-	<div class="col-sm-12">
+	<div class="col-sm-12" style="min-height: 200px">
 		<div id="sharedAlertContainerFiles"></div>
 		<ul class="list-group" id="file-list"></ul>
 	</div>
