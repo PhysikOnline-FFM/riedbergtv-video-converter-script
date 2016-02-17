@@ -1,0 +1,28 @@
+#file-list .list-group-item .row {margin-bottom: 2px}
+.fileprogress{margin-bottom: 4px}
+.fileprogressbar .progress-bar{text-align: right!important; padding: 0 4px;}
+#dropzone{
+	border:3px dashed silver; 
+	border-radius: 12px; 
+	padding: 18px 4px; 
+	margin: 18px 4px;
+	color: silver;
+	-webkit-transition: all 0.4s ease-in-out;
+	transition: all 0.5s cubic-bezier(.3,0,0,.4);
+}
+#dropzone.highlightDropzone{
+	border-color: #46b8da;
+	padding: 56px 4px;
+	color: #46b8da;
+	-webkit-box-shadow: inset 0px 0px 30px 0px rgb(91,192,222);
+	-moz-box-shadow: inset 0px 0px 30px 0px rgb(91,192,222);
+	box-shadow: inset 0px 0px 30px 0px rgb(91,192,222);
+}
+#dropzone.targetDropzone{
+	border-color: #4cae4c;
+	color: #4cae4c;
+	-webkit-box-shadow: inset 0px 0px 30px 0px rgba(92,184,92,1);
+	-moz-box-shadow: inset 0px 0px 30px 0px rgba(92,184,92,1);
+	box-shadow: inset 0px 0px 30px 0px rgba(92,184,92,1);
+	background-color: rgba(92,184,92, 0.1);
+}

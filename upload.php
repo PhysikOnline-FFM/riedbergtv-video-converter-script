@@ -105,7 +105,7 @@ class RTVResumable extends Resumable {
 			// Erzeuge zusammengesetzte Datei und nutze neuen Dateiname
 			$filepathname = $new_target_dir . $new_filename;
             $this->createFileAndDeleteTmp($identifier, $filepathname);
-
+			
 			// Konvertierungsskript starten
 			$mail = isset($post['email']) ? escapeshellarg(trim(strip_tags($post['email']))) : 'elearning@th.physik.uni-frankfurt.de';
 			$logfile = $new_target_dir . $subfolder4video . '.log';
@@ -117,6 +117,12 @@ class RTVResumable extends Resumable {
 			mail($mail, "[riedberg.tv] Upload abgeschlossen & Konvertierung gestartet", 
 						"Der Upload ist abgeschlossen. Die Datei wurde in \"$filepathname'\" gespeichert und die Konvertierung gestartet. " 
 						+"Sobald diese abgeschlossen ist, erhältst du das vollständige Log-File.");
+						
+			// Thumbnailskript starten
+			$input_time = preg_replace("`[^0-9\:]+`i", '', $post['filethumbtime']); 
+			$cmd = "./thumbnails.sh '$filepathname' '$new_target_dir' '$input_time' 1 2 > &1";
+			exec($cmd);
+			$this->returnData = array('thumbnail' => $new_target_dir . basename($filepathname) . "-v1-thumb640.jpg", 'cmd' => $cmd);
         }
 
         return $this->response->header(200);

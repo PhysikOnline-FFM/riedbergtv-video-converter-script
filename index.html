@@ -7,15 +7,9 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
 	
 	<style>
-		.filetarpath,.filename, .filetype, .filesize, .fileactions{display: inline-block}
-		.filetarpath{width: 30%}
-		.filename{width: 35%}
-		.filesize{width: 10%}
-		.filetype{width: 15%; padding-left:4px;}
-		.fileactions{width: 10%; text-align:right; margin-bottom: 3px}
+		#file-list .list-group-item .row {margin-bottom: 2px}
 		.fileprogress{margin-bottom: 4px}
 		.fileprogressbar .progress-bar{text-align: right!important; padding: 0 4px;}
-		#file-list select, #file-list input {display: inline-block}
 		#dropzone{
 			border:3px dashed silver; 
 			border-radius: 12px; 
@@ -85,11 +79,7 @@
  
 		<div class="col-sm-12">
 			<div id="sharedAlertContainerFiles"></div>
-			<ul class="list-group" id="file-list">
-				<li class="list-group-item">
-					<div class="filetarpath">Kategorie</div><div class="filename">Dateiname</div><div class="filetype">Typ</div><div class="filesize">Größe</div><div class="fileactions"></div>
-				</li>
-			</ul>
+			<ul class="list-group" id="file-list"></ul>
         </div>
     </div>
  

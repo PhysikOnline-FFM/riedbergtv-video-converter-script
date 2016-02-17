@@ -1,2 +1,6 @@
-1-uploadform/uploads/*
-2-converterservice/video/*
+uploads/*
+video/*
+bin/*
+old2-converterservice-bak/*
+old3-publishmediawiki/*
+*.mp4

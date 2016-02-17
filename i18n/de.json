@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sven, Philip"
+		]
+	},
+
+	"videoupload": "RiedbergTV Video hochladen",
+	"videoupload-desc": "Eine MediaWiki Extension, zum Upload neuer Videos und automatisierter Konvertierung.",
+	"videoupload-summary": "Hochladen von fertigem Video per Webformular. Automatisches Konvertierung in die notwendigen Formate. Erstellen eines Thumbnails."
+
+}

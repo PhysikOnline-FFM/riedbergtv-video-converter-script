@@ -30,8 +30,9 @@ $( document ).ready(function() {
 			var $li = $('li#' + file.uniqueIdentifier),
 				$inp_target = $li.find('.filetarpath select'),
 				$inp_filename = $li.find('.filename input');
+				$inp_thumbtime = $li.find('.filethumbtime input');
 				
-			return {'filetarpath':$inp_target.val(), 'filename':$inp_filename.val()};
+			return {'filetarpath':$inp_target.val(), 'filename':$inp_filename.val(), 'filethumbtime':$inp_thumbtime.val()};
 		}, 	//Extra parameters to include in the multipart POST with data. This can be an object or a function. If a function, it will be passed a ResumableFile object
 		minFileSize: 500*1024, 	// 500KB+
 		minFileSizeErrorCallback:function(file, errorCount) {
@@ -116,23 +117,49 @@ $( document ).ready(function() {
         //progressBar.fileAdded();
 		var $template = 
 			$('<li class="list-group-item" id="'+file.uniqueIdentifier+'">' +
-				'<div class="filetarpath"><select name="filetarpath" class="form-control"><option value="">Auswählen!</option></select></div>' +
-				'<div class="filename"><input type="text" name="filename" class="form-control" value="'
-					+(file.fileName.substr(0, file.fileName.lastIndexOf('.')) || file.fileName).replace(/[^-0-9A-Z_\.]+/i, '_')
-					+'" maxlength="255" /></div>' +
-				'<div class="filetype">'+file.file.type+'</div>' +
-				'<div class="filesize">'+formatSize(file.size)+'</div>' +
-				'<div class="fileactions"><button class="btn btn-danger btn-sm rm"><span class="glyphicon glyphicon-remove"></span></button></div>' +
+				'<div class="row">'+
+					'<div class="col-md-4 col-lg-3"><label>Hauptkategorie</label></div>'+
+					'<div class="col-md-8 col-lg-9 filetarpath"><select name="filetarpath" class="form-control"><option value="">Auswählen!</option></select></div>'+
+				'</div>' +
+				'<div class="row">'+
+					'<div class="col-md-4 col-lg-3"><label>(Zielort-)Dateiname</label></div>'+
+					'<div class="col-md-8 col-lg-9 filename"><input type="text" name="filename" class="form-control" value="'+file.fileName+'" maxlength="255" /></div>'+
+				'</div>' +
+				'<div class="row">'+
+					'<div class="col-md-4 col-lg-3"><label>Zeitpunkt für Vorschaubild</label></div>'+
+					'<div class="col-md-8 col-lg-9 filethumbtime"><input type="text" name="filethumbtime" class="form-control" value="00:02:00" placeholder="hh:mm:ss" title="Jeweils zweistellig Stunde:Minute:Sekunde (hh:mm:ss)" pattern="[0-9]{2}\:[0-9]{2}\:[0-9]{2}" maxlength="8" /></div>'+
+				'</div>' +
+				'<div class="row">'+
+					'<div class="col-md-4 col-lg-3"><label>Dateigröße</label></div>'+
+					'<div class="col-md-8 col-lg-9 filesize"><span class="form-control-static">'+formatSize(file.size)+'</span></div>'+
+				'</div>' +
+				'<div class="row">'+
+					'<div class="col-md-4 col-lg-3"><label>Dateityp</label></div>'+
+					'<div class="col-md-5 col-lg-7 filetype"><span class="form-control-static">'+file.file.type+'</span></div>'+
+					'<div class="col-md-3 col-lg-2 text-right fileactions"><button class="btn btn-danger btn-sm rm"><span class="glyphicon glyphicon-remove"></span></button></div>'+
+				'</div>' +
+				'<div class="row">'+
+					'<div class="col-md-4 col-lg-3"><label></label></div>'+
+					'<div class="col-md-8 col-lg-9 filethumbnail"></div>'+
+				'</div>' +
 				'<div class="progress fileprogressbar"><div class="progress-bar" role="progressbar" style="width: 0%;"></div>' +
 				'</div></li>');
 		// remove from list button
 		$template.find('.btn.rm').click(function(e){
-			var parent = $(this).parent().parent(),
+			var parent = $(this).parents('li.list-group-item'),
 				identifier = parent.attr('id'),
 				file = r.getFromUniqueIdentifier(identifier);
 			r.removeFile(file);
 			parent.remove();
-		});	
+		});
+		// change event 
+		$template.find('.filename input').on('change keyup', function(e){
+			var val = this.value;
+			this.value = (val.substr(0, val.lastIndexOf('.')) || val).replace(/[^-0-9A-Z_\.]+/i, '_');
+		}).change();
+		$template.find('.filethumbtime input').on('keyup', function(e){
+			this.value = this.value.replace(/[^0-9\:]/g,'');
+		});		
 		// add Targetpath options
 		var $select = $template.find('.filetarpath select');
 		$.each(allowed_filetarpathes, function(k,v){
