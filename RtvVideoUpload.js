@@ -169,8 +169,24 @@ $( document ).ready(function() {
     });
 	
     r.on('fileSuccess', function(file, message){
-        $('li#' + file.uniqueIdentifier).find('.progress-bar').addClass('progress-bar-success');
-    });
+		$('li#' + file.uniqueIdentifier).find('.progress-bar').addClass('progress-bar-success');
+
+		data = getJSONstring(message);
+		if(!data) {
+			showAlert('Finaler Uploadfehler', 'Beim Hochladen der Datei "'+(file.fileName||file.name)+'" ist die Rückgabe kein JSON: <pre>'+message+'</pre>', 'alert-danger');
+		}
+	
+		// show HTML success message
+		console.log("Success uploading file!", file, message);
+		container = $("#" + file.uniqueIdentifier);
+		wikilink = '<a href="'+data.wikipage_link+'">'+data.wikipage_title+'</a>';
+		container.append('<div class="row">'
+			+ '<div class="col-md-4 col-lg-3"><img src="'+data.thumbnail_webpath+'"><br>(pfad: '+data.thumbnail_webpath+')</div>'
+			+ '<div class="col-md-8 col-lg-9 filesize"><h3>Videoseite '+wikilink+'</h3>'
+			+ '<p>Liebe(r) '+data.username+', dein hochgeladenes Video wird derzeit konvertiert und du erhältst eine E-Mail an die Addresse <em>'+data.emailaddr+'</em> sobald es fertig konvertiert ist. In der Zwischenzeit kannst du bereits die Videoseite mit dem Namen "'+wikilink+'" mit einem Text ergänzen.'
+			+ '</div>'
+			+ '</div>');
+	});
 	
 	r.on('fileError', function(file, message){
 		$('li#' + file.uniqueIdentifier).find('.progress-bar').addClass('progress-bar-danger').css('width', '100%').css('color','white').html(message);
@@ -203,3 +219,11 @@ $( document ).ready(function() {
 		allowed_filetarpathes = data;
 	});
 });
+
+function getJSONstring(str) {
+    try {
+        return JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+}

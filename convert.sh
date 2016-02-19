@@ -11,6 +11,7 @@ target_dir=$2
 user_mail=$3
 log_file=$4
 
+
 file_base=$(basename $input_file)
 target_file=${target_dir}$file_base
 err=0

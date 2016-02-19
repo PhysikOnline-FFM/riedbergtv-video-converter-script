@@ -45,5 +45,5 @@ if [ ! -w $target_dir ]; then
   exit 1
 fi
 
-echo -e "\b done sucessfully."
+echo -e "\b""done sucessfully."
 exit 0

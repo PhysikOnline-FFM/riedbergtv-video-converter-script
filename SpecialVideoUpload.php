@@ -11,10 +11,10 @@ class SpecialVideoUpload extends SpecialPage {
 		return 'media'; // Auflistung unter Spezial:Spezialseiten
 	}
 
+
 	function execute($par) {
 		$request = $this->getRequest();
 		$output = $this->getOutput();
-		$this->setHeaders();
 
 		if(!$this->userCanExecute( $this->getUser())) {
 			$this->displayRestrictionError();
@@ -22,7 +22,8 @@ class SpecialVideoUpload extends SpecialPage {
 		}
 		$output->addModuleStyles('ext.RtvVideoUpload');
 		$output->addModuleScripts('ext.RtvVideoUpload');
-		
+
+	
 		# diese Texte werden angezeigt, sobald der Benutzer eingeloggt
 		# die Spezialseite besucht:
 
@@ -75,8 +76,36 @@ HTML
 
 		# include upload.php
 		require_once('upload.php'); # defines Class RTVResumable
-		$resumable = new RTVResumable ($user, $output);
+		$resumable = new RTVResumable ($this);
 		$resumable->process();
+
+		$this->setHeaders();
+	}
+
+	/**
+	 * Usage example:
+	 *   $this->createWikiPage("Bla", array(
+	 * 			'LENGTH' => 'serh sehr lagn',
+	 * 			'VIDEO_PATH' => 'usw',
+	 *   );
+ 	 **/
+	function createWikiPage($newpage_title_str, $template_vars) {
+		$newpage_title = Title::newFromText($newpage_title_str);
+		$newpage = new WikiPage($newpage_title);
+		$user = $this->getUser();
+
+		$newtext = $this->getRawContent("RiedbergTV:Videoseitenvorlage‎");
+		foreach($template_vars as $key => $value) {
+			$newtext = str_replace("@$key@", $value, $newtext);
+		}
+		$ret = $newpage->doEdit($newtext, "Seite angelegt durch [[Spezial:VideoUpload]].", 0, false, $user);
+		return $newpage;
+	}
+
+	function getRawContent($title) {
+		$pageTitle = Title::newFromText($title);
+		$article = new Article($pageTitle);
+		return $article->fetchContent();
 	}
 }
 

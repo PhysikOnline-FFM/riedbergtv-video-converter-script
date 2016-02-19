@@ -37,51 +37,68 @@ class RTVResumable extends Resumable {
 		'sonstiges' => 'sonstiges/', 
 		);
 	
-	public function __construct($wikiUser, $wikiOutput){
-		$this->wikiUser = $wikiUser;
-		$this->wikiOut = $wikiOutput;
-		/* $username = $this->wikiUser->getName();
-		$userpage = $this->wikiUser->getUserPage();
-		$usermail = $this->wikiUser->getEmail();
-		$this->wikiOut->addWikiText("Lieber [[$userpage|$username]], ich kann dir eine E-Mail an [mailto:$usermail $usermail] schicken."); */
+	public function __construct($wikiSpecialPage){
+		$this->specialPage = $wikiSpecialPage;
+		$this->wikiUser = $wikiSpecialPage->getUser();
+		$this->wikiOut = $wikiSpecialPage->getOutput();
 		
-		$this->tempFolder   = '/tmp';
-		$this->uploadFolder = __DIR__ . DIRECTORY_SEPARATOR . 'uploads';
+		// Pfadberechnungen:
+		$this->relativeUploadFolder = 'uploads'; // will be the web path
+		$this->webUploadFolder = '/video-converter/'.$this->relativeUploadFolder;
+
+		$this->uploadFolder = __DIR__ . DIRECTORY_SEPARATOR . $this->relativeUploadFolder;
+		if(!is_dir($this->uploadFolder)) {
+			print "RTVResumable: Installing uploadFolder";
+			mkdir($this->uploadFolder);
+		}
+		$this->tempFolder   = __DIR__ . DIRECTORY_SEPARATOR . 'uploads/tmp';
+		if(!is_dir($this->tempFolder)) {
+			print "RTVResumable: Installing tempFolder";
+			mkdir($this->tempFolder);
+		}
 		
 		$request = new SimpleRequest();
 		$response = new SimpleResponse();
 		parent::__construct($request, $response);
 	}
+
+
+	/*
+	public function resumableParams() {
+		$params =  $_REQUEST;
+		// dirty MediaWiki fix: /wiki/foo -> /w/index.php?title=foo
+		// wird gebraucht, weil manchmal empty($params) gecheckt wird.
+		if(isset($params['title'])) unset($params['title']);
+		return $params;
+	}
+	*/
 	
-	public function process(){
+	public function process() {
 		// Erweiterung der Elternfunktion process()
 		$get = $this->request->data('get');
-		if (!empty($get)) {
-			if (isset($get['allowed_filetarpathes'])){
-				$this->echoJson(self::$allowed_filetarpathes);
-				exit();
-			}
+		unset($get['title']); // dirty MediaWiki fix: /wiki/foo -> /w/index.php?title=foo
+		$post = $this->request->data('post');
+
+		if (isset($get['allowed_filetarpathes'])){
+			$this->echoJson(self::$allowed_filetarpathes);
+			exit();
 		}
 		
-		// Dirty fix for MediaWiki integration:
-		// by default their is a GET Parameter 'title'
-		// dump = $this->resumableParams();
-		// var_dump($dump);
-		$params = $this->resumableParams();
-		unset($params['title']);
-		if (!empty($params)) {
-            if (!empty($this->request->file())) {
-                $this->handleChunk();
-            } else {
-                $this->handleTestChunk();
-            }
-			
+		if (!empty($this->request->file())) {
+			$this->handleChunk();
 			if (isset($this->returnData)){
 				$this->echoJson($this->returnData);
 			}
-			exit(); # to prevent MediaWiki to return html output.
-        }
+			exit();
+		} elseif(!empty($get)) {
+			$this->handleTestChunk();
+			if (isset($this->returnData)){
+				$this->echoJson($this->returnData);
+			}
+			exit();
+		}
 		
+		print "<!-- VideoUpload: Deleting prune chunks -->\n";
 		$this->pruneChunks(true); # on a random base. Other option is to implement a cron script
 	}
 
@@ -100,13 +117,17 @@ class RTVResumable extends Resumable {
 		$chunkSize = $this->resumableParam('chunkSize');
 		$totalSize = $this->resumableParam('totalSize');
 
+		#print("HandleChunk!");
+
 		if (!$this->isChunkUploaded($identifier, $filename, $chunkNumber)) {
+			#print "isChunkUploaded.\n";
 			$chunkFile = $this->tmpChunkDir($identifier) . DIRECTORY_SEPARATOR . $this->tmpChunkFilename($filename, $chunkNumber);
+			#print "Move '".$file['tmp_name']."' to '$chunkFile'.\n";
 			$this->moveUploadedFile($file['tmp_name'], $chunkFile);
 		}
 
-        if ($this->isFileUploadComplete($filename, $identifier, $chunkSize, $totalSize)) {
-			
+        	if ($this->isFileUploadComplete($filename, $identifier, $chunkSize, $totalSize)) {
+			#print "FileUploadComplete!\n";	
 			// Sicherheitsaspekte nach http://php.net/manual/de/function.move-uploaded-file.php
 			$post = $this->request->data('post'); # $post['filename'] is different to $this->resumableParam('filename'); !!
 			
@@ -135,27 +156,60 @@ class RTVResumable extends Resumable {
 
 			// Erzeuge zusammengesetzte Datei und nutze neuen Dateiname
 			$filepathname = $new_target_dir . $new_filename;
-            $this->createFileAndDeleteTmp($identifier, $filepathname);
-			
+           		$this->createFileAndDeleteTmp($identifier, $filepathname);
+
+			// Hack: Wechsle mit PHP in das Verzeichnis des upload.php-Scripts.
+			// Das ist wichtig, damit auch alle Shellskripte sich huebsch gegenseitig aufrufen koennen.
+			chdir(__DIR__ );
+
 			// Konvertierungsskript starten
-			$usermail = $user->getEmail();
+			$usermail = $this->wikiUser->getEmail();
 			$mail = isset($usermail) ? escapeshellarg(trim(strip_tags($usermail))) : 'elearning@th.physik.uni-frankfurt.de';
-			$logfile = $new_target_dir . $subfolder4video . '.log';
-			$cmd = "./convert.sh '$filepathname' '$new_target_dir' '$mail' '$logfile' > '$logfile' &";
+			$logfile = escapeshellarg($new_target_dir . $subfolder4video . '.log');
+			$cmd = "./convert.sh '$filepathname' '$new_target_dir' '$mail' '$logfile' > '$logfile' 2>&1  &";
 			$ret = exec($cmd);
 			// debug $this->returnData = array($cmd, $ret); 
 			
 			// info an Nutzer
-			mail($mail, "[riedberg.tv] Upload abgeschlossen & Konvertierung gestartet", 
-						"Der Upload ist abgeschlossen. Die Datei wurde in \"$filepathname'\" gespeichert und die Konvertierung gestartet. " 
-						+"Sobald diese abgeschlossen ist, erhältst du das vollständige Log-File.");
+			$this->wikiUser->sendMail(
+				"[riedberg.tv] Upload abgeschlossen & Konvertierung gestartet", 
+				"Der Upload ist abgeschlossen. Die Datei wurde in \"$filepathname'\" gespeichert und die Konvertierung gestartet. " 
+				+"Sobald diese abgeschlossen ist, erhältst du das vollständige Log-File."
+			);
 						
 			// Thumbnailskript starten
 			$input_time = preg_replace("`[^0-9\:]+`i", '', $post['filethumbtime']); 
-			$cmd = "./thumbnails.sh '$filepathname' '$new_target_dir' '$input_time' 1 2 > &1";
+			$cmd = "./thumbnails.sh '$filepathname' '$new_target_dir' '$input_time' 2>&1";
 			exec($cmd);
-			$this->returnData = array('thumbnail' => $new_target_dir . basename($filepathname) . "-v1-thumb640.jpg", 'cmd' => $cmd);
-        }
+
+			// Wikiseite wird von SpecialPage angelegt
+			$wikipage_title = 'XXXXXXXXXX';
+			$template_vars = array(
+				'LENGTH' => /* Videolaenge rausfinden mit ffmpeg */ 'xxxxx',
+				'VIDEO_PATH' => /* sowas wie "/videos/biologie/ordner" */ 'yyyyy',
+				'FILE_PREFIX' => /* sowas wie "VideoMaentele (ohne Dateiendung) */ 'zzzzz',
+				'DATE' => date('d.m.Y g:i:s'),
+			);
+			$page = $this->specialPage->createWikiPage($wikipage_title, $template_vars);
+			$title = $page->getTitle();
+			$wikipage_link = $title->getCanonicalURL();
+			$wikipage_editlink = $title->getEditURL();
+
+			// Fehlermeldung "Uncommitted DB writes": MediaWiki mag es wahrscheinlich nicht,
+			// wenn man exit() aufruft. vgl. http://stackoverflow.com/a/22695318	
+			$lb = wfGetLBFactory();
+			$lb->shutdown();
+
+			$this->returnData = array(
+				'thumbnail' => $new_target_dir . basename($filepathname) . "-v1-thumb640.jpg", 'cmd' => $cmd,
+				'thumbnail_webpath' => 'https://i.ytimg.com/vi/b3Ql6C9CeWc/hqdefault.jpg',
+				'wikipage_title' => $wikipage_title,
+				'wikipage_link' => $wikipage_link,
+				'wikipage_editlink' => $wikipage_editlink,
+				'username' => $this->wikiUser->getName(),
+				'emailaddr'=> $this->wikiUser->getEmail(),
+			);
+	        }
 
         return $this->response->header(200);
     }
@@ -173,12 +227,12 @@ class RTVResumable extends Resumable {
 	
 	# We need this function here, because Resumable did declare it private
 	protected function resumableParam($shortName){
-        $resumableParams = $this->resumableParams();
-        if (!isset($resumableParams['resumable' . ucfirst($shortName)])) {
-            return null;
-        }
-        return $resumableParams['resumable' . ucfirst($shortName)];
-    }
+		$resumableParams = $_REQUEST;
+		if (!isset($resumableParams['resumable' . ucfirst($shortName)])) {
+		    return null;
+		}
+		return $resumableParams['resumable' . ucfirst($shortName)];
+	}
 	
 	# New functionality to delete old chunks, which did not upload completely
 	public function pruneChunks($force=false, $expirationTime=172800, $folder=Null){
