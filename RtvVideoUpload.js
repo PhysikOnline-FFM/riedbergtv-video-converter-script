@@ -1,7 +1,7 @@
 $( document ).ready(function() {
 	
 	var allowed_filetarpathes = {},
-	upload_url = 'upload.php',
+	upload_url = window.location.href,
 	showAlert = function(title, text, cssClass='alert-info', parent){
 		if (parent === undefined) parent = '#sharedAlertContainerFiles';
 		// Create Alert Box

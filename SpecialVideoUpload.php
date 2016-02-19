@@ -28,11 +28,10 @@ class SpecialVideoUpload extends SpecialPage {
 
 		# wir koennen hier auf alle moeglichen Objekte zugreifen.
 		$user = $this->getUser();
-		$username = $user->getName();
+		/* $username = $user->getName();
 		$userpage = $user->getUserPage();
-		$usermail = $user->getEmail();
-		$output->addWikiText("Lieber [[$userpage|$username]], ich kann dir eine E-Mail an [mailto:$usermail $usermail] schicken.");
-
+		$usermail = $user->getEmail(); */
+		
 		$output->addHTML(<<<HTML
 <div class="row">
 	<noscript>
@@ -73,6 +72,11 @@ class SpecialVideoUpload extends SpecialPage {
 </div>
 HTML
 );
+
+		# include upload.php
+		require_once('upload.php'); # defines Class RTVResumable
+		$resumable = new RTVResumable ($user, $output);
+		$resumable->process();
 	}
 }
 

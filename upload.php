@@ -1,11 +1,13 @@
 <?php
 /*
 	TODO::
+	- check why thumbnail generation does not work
+	- improve mail notification (try to use media wiki or shell)
 	- check file type
 	- remove old folders of unsecussful upload attempts (low prio)
 */
 
-require_once('vendor/autoload.php');
+require_once(__DIR__ .'/vendor/autoload.php');
 
 use Cake\Filesystem\File; 
 use Cake\Filesystem\Folder; 
@@ -18,6 +20,8 @@ use Dilab\Resumable;
 class RTVResumable extends Resumable {
 	
 	protected $returnData = null;
+	private $wikiUser = null;
+	private $wikiOut = null;
 
 	public static $allowed_filetarpathes = array(
 		'Campus Riedberg' => 'campus/riedberg/', 
@@ -33,9 +37,23 @@ class RTVResumable extends Resumable {
 		'sonstiges' => 'sonstiges/', 
 		);
 	
-	# parent::__construct() has not to be called if RTVResumable does not define it's own constructor.
+	public function __construct($wikiUser, $wikiOutput){
+		$this->wikiUser = $wikiUser;
+		$this->wikiOut = $wikiOutput;
+		/* $username = $this->wikiUser->getName();
+		$userpage = $this->wikiUser->getUserPage();
+		$usermail = $this->wikiUser->getEmail();
+		$this->wikiOut->addWikiText("Lieber [[$userpage|$username]], ich kann dir eine E-Mail an [mailto:$usermail $usermail] schicken."); */
+		
+		$this->tempFolder   = '/tmp';
+		$this->uploadFolder = __DIR__ . DIRECTORY_SEPARATOR . 'uploads';
+		
+		$request = new SimpleRequest();
+		$response = new SimpleResponse();
+		parent::__construct($request, $response);
+	}
 	
-	public function rtvprocess(){
+	public function process(){
 		// Erweiterung der Elternfunktion process()
 		$get = $this->request->data('get');
 		if (!empty($get)) {
@@ -45,13 +63,26 @@ class RTVResumable extends Resumable {
 			}
 		}
 		
-		$this->process(); // parent process
+		// Dirty fix for MediaWiki integration:
+		// by default their is a GET Parameter 'title'
+		// dump = $this->resumableParams();
+		// var_dump($dump);
+		$params = $this->resumableParams();
+		unset($params['title']);
+		if (!empty($params)) {
+            if (!empty($this->request->file())) {
+                $this->handleChunk();
+            } else {
+                $this->handleTestChunk();
+            }
+			
+			if (isset($this->returnData)){
+				$this->echoJson($this->returnData);
+			}
+			exit(); # to prevent MediaWiki to return html output.
+        }
 		
 		$this->pruneChunks(true); # on a random base. Other option is to implement a cron script
-
-		if (isset($this->returnData)){
-			$this->echoJson($this->returnData);
-		}
 	}
 
 	public function echoJson($data){
@@ -107,7 +138,8 @@ class RTVResumable extends Resumable {
             $this->createFileAndDeleteTmp($identifier, $filepathname);
 			
 			// Konvertierungsskript starten
-			$mail = isset($post['email']) ? escapeshellarg(trim(strip_tags($post['email']))) : 'elearning@th.physik.uni-frankfurt.de';
+			$usermail = $user->getEmail();
+			$mail = isset($usermail) ? escapeshellarg(trim(strip_tags($usermail))) : 'elearning@th.physik.uni-frankfurt.de';
 			$logfile = $new_target_dir . $subfolder4video . '.log';
 			$cmd = "./convert.sh '$filepathname' '$new_target_dir' '$mail' '$logfile' > '$logfile' &";
 			$ret = exec($cmd);
@@ -176,11 +208,3 @@ class RTVResumable extends Resumable {
 		}
 	}
 }
-
-$request = new SimpleRequest();
-$response = new SimpleResponse();
-
-$resumable = new RTVResumable ($request, $response);
-$resumable->tempFolder   = __DIR__ . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'tmp';
-$resumable->uploadFolder = __DIR__ . DIRECTORY_SEPARATOR . 'uploads';
-$resumable->rtvprocess();
