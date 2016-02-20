@@ -12,7 +12,7 @@ user_mail=$3
 log_file=$4
 
 
-file_base=$(basename $input_file)
+file_base=$(basename -s '.orig.mp4' $input_file)
 target_file=${target_dir}$file_base
 err=0
 
@@ -30,13 +30,12 @@ echo -e "CONVERTING START: `date +%c` \n"
 #Full-HD versions
 ffmpeg -i $input_file -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 ${target_file}.webm &
 ffmpeg -i $input_file -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22  ${target_file}.mp4 &
-ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --frontend -o ${target_file}.ogv &
-
+ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --no-skeleton --frontend -o ${target_file}.ogv &
 
 # Small (640x360) versions
 ffmpeg -i $input_file -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22 -s 640x360  ${target_file}.small.mp4 &
 ffmpeg -i $input_file -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 -s 640x360  ${target_file}.small.webm &
-ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --width 640  --frontend -o ${target_file}.small.ogv &
+ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --width 640 --no-skeleton --frontend -o ${target_file}.small.ogv &
 
 #wait until converting is done
 wait

@@ -24,15 +24,16 @@ $( document ).ready(function() {
 	r = new Resumable({
         target: upload_url,			// target url to server script
         testChunks: true,			// Check if chunk has uploaded already before
-		chunkSize: 4*1024*1024,
+		chunkSize: 3*1024*1024,
 		simultaneousUploads: 2,
 		query: function(file){
 			var $li = $('li#' + file.uniqueIdentifier),
 				$inp_target = $li.find('.filetarpath select'),
-				$inp_filename = $li.find('.filename input');
-				$inp_thumbtime = $li.find('.filethumbtime input');
+				$inp_filename = $li.find('.filename input'),
+				$inp_thumbtime = $li.find('.filethumbtime input'),
+                $inp_wikititel = $li.find('.filewikititel input');
 				
-			return {'filetarpath':$inp_target.val(), 'filename':$inp_filename.val(), 'filethumbtime':$inp_thumbtime.val()};
+			return {'filetarpath':$inp_target.val(), 'filename':$inp_filename.val(), 'filethumbtime':$inp_thumbtime.val(), 'filewikititel': $inp_wikititel.val()};
 		}, 	//Extra parameters to include in the multipart POST with data. This can be an object or a function. If a function, it will be passed a ResumableFile object
 		minFileSize: 500*1024, 	// 500KB+
 		minFileSizeErrorCallback:function(file, errorCount) {
@@ -118,8 +119,21 @@ $( document ).ready(function() {
 		var $template = 
 			$('<li class="list-group-item" id="'+file.uniqueIdentifier+'">' +
 				'<div class="row">'+
-					'<div class="col-md-4 col-lg-3"><label>Hauptkategorie</label></div>'+
-					'<div class="col-md-8 col-lg-9 filetarpath"><select name="filetarpath" class="form-control"><option value="">Auswählen!</option></select></div>'+
+                    '<div class="col-md-3 col-lg-2 pull-right text-right fileactions"><button class="btn btn-danger btn-sm rm"><span class="glyphicon glyphicon-remove"></span></button></div>'+
+					'<div class="col-md-4 col-lg-3"><label>Um was gehts?</label></div>'+
+					'<div class="col-md-5 col-lg-7 filetarpath"><select name="filetarpath" class="form-control"><option value="">Auswählen!</option></select></div>'+
+				'</div>' +
+                '<div class="row">'+
+					'<div class="col-md-4 col-lg-3"><label>Wiki-Seitentitel</label></div>'+
+					'<div class="col-md-8 col-lg-9 filewikititel"><input type="text" name="filewikititel" class="form-control" value="" maxlength="60" placeholder="z.B. Kurzinterview PhysikOnline"/></div>'+
+				'</div>' +
+                '<div class="row">'+
+					'<div class="col-md-4 col-lg-3"><label>Videotitel</label></div>'+
+					'<div class="col-md-8 col-lg-9 filevideotitel"><input type="text" name="filevideotitel" class="form-control" value="" maxlength="60" placeholder="z.B. Prof. Dr. Galileo Galilei"/></div>'+
+				'</div>' +
+                '<div class="row">'+
+					'<div class="col-md-4 col-lg-3"><label>Videountertitel</label></div>'+
+					'<div class="col-md-8 col-lg-9 filevideountertitel"><input type="text" name="filevideountertitel" class="form-control" value="" maxlength="60" placeholder="z.B. Sein zwei Planetensystem" /></div>'+
 				'</div>' +
 				'<div class="row">'+
 					'<div class="col-md-4 col-lg-3"><label>(Zielort-)Dateiname</label></div>'+
@@ -133,17 +147,16 @@ $( document ).ready(function() {
 					'<div class="col-md-4 col-lg-3"><label>Dateigröße</label></div>'+
 					'<div class="col-md-8 col-lg-9 filesize"><span class="form-control-static">'+formatSize(file.size)+'</span></div>'+
 				'</div>' +
-				'<div class="row">'+
+				/*'<div class="row">'+
 					'<div class="col-md-4 col-lg-3"><label>Dateityp</label></div>'+
-					'<div class="col-md-5 col-lg-7 filetype"><span class="form-control-static">'+file.file.type+'</span></div>'+
-					'<div class="col-md-3 col-lg-2 text-right fileactions"><button class="btn btn-danger btn-sm rm"><span class="glyphicon glyphicon-remove"></span></button></div>'+
-				'</div>' +
+					'<div class="col-md-8 col-lg-9 filetype"><span class="form-control-static">'+file.file.type+'</span></div>'+
+				'</div>' +*/
+				'<div class="progress fileprogressbar"><div class="progress-bar" role="progressbar" style="width: 0%;"></div></div>' +
 				'<div class="row">'+
 					'<div class="col-md-4 col-lg-3"><label></label></div>'+
-					'<div class="col-md-8 col-lg-9 filethumbnail"></div>'+
+					'<div class="col-md-8 col-lg-9 videopreview"></div>'+
 				'</div>' +
-				'<div class="progress fileprogressbar"><div class="progress-bar" role="progressbar" style="width: 0%;"></div>' +
-				'</div></li>');
+				'</li>');
 		// remove from list button
 		$template.find('.btn.rm').click(function(e){
 			var parent = $(this).parents('li.list-group-item'),
@@ -166,6 +179,13 @@ $( document ).ready(function() {
 			$select.append('<option value="'+v+'">'+k+'</option>');
 		});
 		$('#file-list').append($template);
+        
+        // add preview
+        /* Wegen Fehler "Kein Video mit unterstützem Format" auskommentiert.
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            renderVideoPreview(file.file, $template.find('.videopreview'));
+        }
+        */
     });
 	
     r.on('fileSuccess', function(file, message){
@@ -180,10 +200,11 @@ $( document ).ready(function() {
 		console.log("Success uploading file!", file, message);
 		container = $("#" + file.uniqueIdentifier);
 		wikilink = '<a href="'+data.wikipage_link+'">'+data.wikipage_title+'</a>';
-		container.append('<div class="row">'
-			+ '<div class="col-md-4 col-lg-3"><img src="'+data.thumbnail_webpath+'"><br>(pfad: '+data.thumbnail_webpath+')</div>'
+		container.prepend('<div class="row alert alert-success">'
+			+ '<div class="col-md-4 col-lg-3"><a href="'+data.thumbnail_webpath+'" title="Pfad zum Vorschaubild"><img src="'+data.thumbnail_webpath+'" /><br><small>Vorschaubild Pfad</small></a></div>'
 			+ '<div class="col-md-8 col-lg-9 filesize"><h3>Videoseite '+wikilink+'</h3>'
-			+ '<p>Liebe(r) '+data.username+', dein hochgeladenes Video wird derzeit konvertiert und du erhältst eine E-Mail an die Addresse <em>'+data.emailaddr+'</em> sobald es fertig konvertiert ist. In der Zwischenzeit kannst du bereits die Videoseite mit dem Namen "'+wikilink+'" mit einem Text ergänzen.'
+			+ '<p>'+data.username+', dein hochgeladenes Video wird derzeit konvertiert und du erhältst eine E-Mail an die Addresse <em>'+data.emailaddr+'</em> sobald es fertig konvertiert ist. '
+            +'<br /><strong>In der Zwischenzeit kannst du bereits die Videoseite <a href="'+data.wikipage_editlink+'" title="Wikiseite bearbeiten">'+data.wikipage_title+'" ergänzen und bearbeiten</a>.</strong>'
 			+ '</div>'
 			+ '</div>');
 	});
@@ -226,4 +247,15 @@ function getJSONstring(str) {
     } catch (e) {
         return false;
     }
+}
+
+//this function is called when the input loads a video
+function renderVideoPreview(file, container){
+    var reader = new FileReader();
+    reader.onload = function(event){
+        the_url = event.target.result
+        $(container).html("<video width='400' controls><source src='"+the_url+"' type='video/mp4'></video>");
+    }
+    //when the file is read it triggers the onload event above.
+    reader.readAsDataURL(file);
 }

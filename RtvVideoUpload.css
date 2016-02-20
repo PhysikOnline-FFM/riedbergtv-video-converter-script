@@ -1,6 +1,7 @@
 #file-list .list-group-item .row {margin-bottom: 2px}
 .fileprogress{margin-bottom: 4px}
 .fileprogressbar .progress-bar{text-align: right!important; padding: 0 4px;}
+.filesize  span{padding-left: 12px;}
 #dropzone{
 	border:3px dashed silver; 
 	border-radius: 12px; 
