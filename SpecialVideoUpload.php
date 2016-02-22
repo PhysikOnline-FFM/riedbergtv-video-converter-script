@@ -20,9 +20,10 @@ class SpecialVideoUpload extends SpecialPage {
 			$this->displayRestrictionError();
 			return;
 		}
-		$output->addModuleStyles('ext.RtvVideoUpload');
+		
+		// Does not work??? $output->addModules('ext.RtvVideoUpload');
+        $output->addModuleStyles('ext.RtvVideoUpload');
 		$output->addModuleScripts('ext.RtvVideoUpload');
-
 	
 		# diese Texte werden angezeigt, sobald der Benutzer eingeloggt
 		# die Spezialseite besucht:
