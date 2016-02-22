@@ -44,11 +44,19 @@
             $this->wikiOut = $wikiSpecialPage->getOutput();
             
             // Pfade
-            $this->tempFolder   = '/tmp'; # Ordner zum Sammeln der Chunks bis Upload vollständig.
+            #$this->tempFolder   = __DIR__ . '/tmp_uploads'; # Ordner zum Sammeln der Chunks bis Upload vollständig.
+            $this->tempFolder   = '/tmp/rtv-video-uploads'; # Ordner zum Sammeln der Chunks bis Upload vollständig.
             $this->absHtdcs = '/home/riedbergtv/www.riedberg.tv'; # Pfad zum Webordner
             $this->webUploadFolder = '/rtv-videos'; # Ordner innerhalb des Webordners für die fertigen Uploads
             $this->uploadFolder = $this->absHtdcs . $this->webUploadFolder; # absoluter Pfad zu den fertigen Uploads
             
+            if(!is_dir($this->tempFolder)){
+                mkdir($this->tempFolder);
+            }
+			if(!is_dir($this->uploadFolder)){
+                mkdir($this->uploadFolder);
+            }
+
             $request = new SimpleRequest();
             $response = new SimpleResponse();
             parent::__construct($request, $response);

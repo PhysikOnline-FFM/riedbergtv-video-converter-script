@@ -32,8 +32,16 @@ $( document ).ready(function() {
 				$inp_filename = $li.find('.filename input'),
 				$inp_thumbtime = $li.find('.filethumbtime input'),
                 $inp_wikititel = $li.find('.filewikititel input');
+                $inp_vidertitel = $li.find('.filevideotitel input');
+                $inp_videruntertitel = $li.find('.filevideountertitel input');
 				
-			return {'filetarpath':$inp_target.val(), 'filename':$inp_filename.val(), 'filethumbtime':$inp_thumbtime.val(), 'filewikititel': $inp_wikititel.val()};
+			return {'filetarpath': $inp_target.val(), 
+			        'filename': $inp_filename.val(), 
+					'filethumbtime': $inp_thumbtime.val(), 
+					'filewikititel': $inp_wikititel.val(),
+					'filevideotitel': $inp_vidertitel.val(),
+					'filevideountertitel': $inp_videruntertitel.val(),
+					};
 		}, 	//Extra parameters to include in the multipart POST with data. This can be an object or a function. If a function, it will be passed a ResumableFile object
 		minFileSize: 500*1024, 	// 500KB+
 		minFileSizeErrorCallback:function(file, errorCount) {

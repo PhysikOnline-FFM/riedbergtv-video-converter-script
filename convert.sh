@@ -47,12 +47,12 @@ echo -e "\n""CONVERTING END: `date +%c`"
 #array of all fileextensions
 fileTypes=(".webm" ".mp4" ".ogv" ".small.webm" ".small.mp4" ".small.ogv")
 
-echo -e "\n""checking files:"
+echo -e "\n""START FILE CHECKING: "
 for (( i=0;i<${#fileTypes[@]};i++ )); do
     if [ -e ${target_file}${fileTypes[${i}]} ]; then
-      echo ${fileTypes[${i}]}" SUCCESSFUL"
+      echo "SUCCESSFUL "${fileTypes[${i}]}
     else
-      echo ${fileTypes[${i}]}" ERROR: file does not exist"
+      echo "ERROR "${fileTypes[${i}]}"-file does not exist"
       err+=1
     fi
 done

@@ -11,7 +11,7 @@ target_dir=$2
 target_file=${target_dir}$(basename $input_file)
 
 #SANITY-CHECKS
-echo "checking..."
+echo "CHECK START"
 #Do all packages exist?
 if (! dpkg -l ffmpeg > /dev/null ); then
   echo "Package ffmpeg is not installed! -- ABORT"
@@ -45,5 +45,5 @@ if [ ! -w $target_dir ]; then
   exit 1
 fi
 
-echo -e "\b""done sucessfully."
+echo "CHECK END: sucessful."
 exit 0
