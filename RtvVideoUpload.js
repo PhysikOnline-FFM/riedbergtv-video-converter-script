@@ -180,7 +180,10 @@ $( document ).ready(function() {
 			this.value = (val.substr(0, val.lastIndexOf('.')) || val).replace(/[^-0-9A-Z_\.]+/i, '_');
 		}).change();
 		$template.find('.filethumbtime input').on('keyup', function(e){
-			this.value = this.value.replace(/[^0-9\:]/g,'');
+			// FIX for Chrome, aber noch nicht optimal bzgl Usability
+            var new_val = this.value.replace(/[^0-9\:]/g,'');
+            if (new_val !== this.value)
+                this.value = new_val;
 		});		
 		// add Targetpath options
 		var $select = $template.find('.filetarpath select');
