@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#Dieses Skript konvertiert eine mp4 Datei in die drei Ausgabeformate .mp4, .webm, .ogv
+#Dieses Skript konvertiert eine mp4 Datei in die #drei zwei Ausgabeformate .mp4, .webm #, .ogv
 
 #Dabei nimmt es den Input-File, den Ausgabe-Ordner, die Mailadresse des Nutzers und den 
 #verwendeten Logfile
@@ -30,11 +30,13 @@ echo -e "CONVERTING START: `date +%c` \n"
 #Full-HD versions
 ffmpeg -i $input_file -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 ${target_file}.webm &
 ffmpeg -i $input_file -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22  ${target_file}.mp4 &
+#ffmpeg2theora does not work anymore
 #ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --no-skeleton --frontend -o ${target_file}.ogv &
 
 # Small (640x360) versions
 ffmpeg -i $input_file -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22 -s 640x360  ${target_file}.small.mp4 &
 ffmpeg -i $input_file -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 -s 640x360  ${target_file}.small.webm &
+#ffmpeg2theora does not work anymore
 #ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --width 640 --no-skeleton --frontend -o ${target_file}.small.ogv &
 
 #wait until converting is done
@@ -45,7 +47,9 @@ echo -e "\n""CONVERTING END: `date +%c`"
 #Check if all files exist
 
 #array of all fileextensions
-fileTypes=(".webm" ".mp4" ".ogv" ".small.webm" ".small.mp4" ".small.ogv")
+#w/ and w/o .ogv
+#fileTypes=(".webm" ".mp4" ".ogv" ".small.webm" ".small.mp4" ".small.ogv")
+fileTypes=(".webm" ".mp4" ".small.webm" ".small.mp4")
 
 echo -e "\n""START FILE CHECKING: "
 for (( i=0;i<${#fileTypes[@]};i++ )); do
