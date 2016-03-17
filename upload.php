@@ -26,15 +26,20 @@
         
         protected static $allowed_filetarpathes = array(
             'Campus Riedberg' => 'campus/riedberg/', 
-            'Interview (Biologie)' => 'interviews/biologie/', 
+            'Interview (Biologiewissenschaften)' => 'interviews/biologie/', 
             'Interview (Chemie)' => 'interviews/chemie/', 
+            'Interview (Geowissenschaften)' => 'interviews/geow/', 
+            'Interview (Informatik)' => 'interviews/info/', 
+            'Interview (Mathematik)' => 'interviews/mathe/', 
             'Interview (Meteorologie)' => 'interviews/meteo/', 
             'Interview (Pharmazie)' => 'interviews/pharmazie/', 
             'Interview (Physik)' => 'interviews/physik/', 
             'Interview (sonstige)' => 'interviews/', 
             'Nachrichten' => 'nachrichten/', 
+            'Praktikum' => 'praktikum/', 
             'Unterhaltung' => 'unterhaltung/', 
             'Veranstaltungen' => 'veranstaltungen/', 
+            'Vorlesungen' => 'vorlesungen/', 
             'sonstiges' => 'sonstiges/', 
 		);
         
