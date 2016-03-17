@@ -25,7 +25,7 @@ $( document ).ready(function() {
 	r = new Resumable({
         target: upload_url,			// target url to server script
         testChunks: true,			// Check if chunk has uploaded already before
-		chunkSize: 3*1024*1024,
+		chunkSize: 4*1024*1024,
 		simultaneousUploads: 2,
 		query: function(file){
 			var $li = $('li#' + file.uniqueIdentifier),
@@ -146,7 +146,7 @@ $( document ).ready(function() {
 				'</div>' +
 				'<div class="row">'+
 					'<div class="col-md-4 col-lg-3"><label>(Zielort-)Dateiname</label></div>'+
-					'<div class="col-md-8 col-lg-9 filename"><input type="text" name="filename" class="form-control" value="'+file.fileName+'" maxlength="255" /></div>'+
+					'<div class="col-md-8 col-lg-9 filename"><input type="text" name="filename" class="form-control" value="'+file.fileName+'" maxlength="80" /></div>'+
 				'</div>' +
 				'<div class="row">'+
 					'<div class="col-md-4 col-lg-3"><label>Zeitpunkt für Vorschaubild</label></div>'+

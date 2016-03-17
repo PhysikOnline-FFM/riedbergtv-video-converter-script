@@ -24,7 +24,7 @@
         private $wikiOut;
         private $specialPage;
         
-        public static $allowed_filetarpathes = array(
+        protected static $allowed_filetarpathes = array(
             'Campus Riedberg' => 'campus/riedberg/', 
             'Interview (Biologie)' => 'interviews/biologie/', 
             'Interview (Chemie)' => 'interviews/chemie/', 

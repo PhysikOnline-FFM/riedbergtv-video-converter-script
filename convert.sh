@@ -28,14 +28,26 @@ echo -e "CONVERTING START: `date +%c` \n"
 
 #Actual Converting
 #Full-HD versions
-ffmpeg -i $input_file -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 ${target_file}.webm &
+#mp4
 ffmpeg -i $input_file -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22  ${target_file}.mp4 &
+
+#webm
+ffmpeg -i $input_file -c:v libvpx-vp9 -b:v 0 -crf 31 -threads 8 -speed 1 \
+ -tile-columns 6 -frame-parallel 1 -auto-alt-ref 1 -lag-in-frames 25 \
+ -c:a libopus -b:a 160K -f webm ${target_file}.webm &
+
 #ffmpeg2theora does not work anymore
 #ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --no-skeleton --frontend -o ${target_file}.ogv &
 
 # Small (640x360) versions
+#mp4
 ffmpeg -i $input_file -strict experimental -f mp4 -vcodec libx264 -acodec aac -ab 160000 -ac 2 -preset slow -crf 22 -s 640x360  ${target_file}.small.mp4 &
-ffmpeg -i $input_file -f webm -vcodec libvpx -acodec libvorbis -ab 160000 -crf 22 -s 640x360  ${target_file}.small.webm &
+
+#webm
+ffmpeg -i $input_file -c:v libvpx-vp9 -b:v 0 -crf 30 -threads 8 -speed 1 \
+  -tile-columns 6 -frame-parallel 1 -auto-alt-ref 1 -lag-in-frames 25 \
+  -c:a libopus -b:a 160K -f webm -s 640x360 ${target_file}.small.webm &
+
 #ffmpeg2theora does not work anymore
 #ffmpeg2theora $input_file --videoquality 8 --audioquality 6 --width 640 --no-skeleton --frontend -o ${target_file}.small.ogv &
 

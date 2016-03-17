@@ -20,11 +20,11 @@ class SpecialVideoUpload extends SpecialPage {
 			$this->displayRestrictionError();
 			return;
 		}
-		
+
 		// Does not work??? $output->addModules('ext.RtvVideoUpload');
         $output->addModuleStyles('ext.RtvVideoUpload');
 		$output->addModuleScripts('ext.RtvVideoUpload');
-	
+
 		# diese Texte werden angezeigt, sobald der Benutzer eingeloggt
 		# die Spezialseite besucht:
 
@@ -33,7 +33,7 @@ class SpecialVideoUpload extends SpecialPage {
 		/* $username = $user->getName();
 		$userpage = $user->getUserPage();
 		$usermail = $user->getEmail(); */
-		
+
 		$output->addHTML(<<<HTML
 <div class="row">
 	<noscript>
@@ -47,10 +47,16 @@ class SpecialVideoUpload extends SpecialPage {
 	</div>
 
 	<div class="col-sm-12">
-		<button type="button" class="btn btn-info" aria-label="Add file" id="add-file-btn">
+		<button type="button" class="btn btn-primary" aria-label="Add file" id="add-file-btn">
 			<span class="glyphicon glyphicon-file" aria-hidden="true"></span>&nbsp;
 			<span class="text">Datei auswählen</span>
 		</button>
+		<a href="https://riedberg.tv/wiki/Anleitung_Upload">
+			<button class="btn btn-info">
+				<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>&nbsp;
+				<span class="text">Anleitung</span>
+			</button>
+		</a>
 		<button type="button" class="btn btn-success pull-right" aria-label="Start upload" id="start-upload-btn">
 			<span class="glyphicon glyphicon-upload" aria-hidden="true"></span>&nbsp;
 			<span class="text">Upload starten</span>
@@ -60,7 +66,7 @@ class SpecialVideoUpload extends SpecialPage {
 			<span class="text">Pausieren</span>
 		</button>
 	</div>
-		
+
 	<div class="col-sm-12">
 		<div id="dropzone" class="dropzone text-center">
 			<h1 style="margin:0">Drag & Drop here</h1>
@@ -72,6 +78,7 @@ class SpecialVideoUpload extends SpecialPage {
 		<ul class="list-group" id="file-list"></ul>
 	</div>
 </div>
+
 HTML
 );
 
@@ -109,5 +116,3 @@ HTML
 		return $article->fetchContent();
 	}
 }
-
-
