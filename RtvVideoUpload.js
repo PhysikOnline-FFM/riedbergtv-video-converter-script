@@ -83,8 +83,10 @@ $( document ).ready(function() {
 					errors.mime++;
 				}
 			});
-			if (errors.inputs === 0 && errors.mime === 0)
+			if (errors.inputs === 0 && errors.mime === 0) {
+        
 				r.upload();
+      }
 			else {
 				if (errors.inputs !== 0)
 					showAlert('Fehlende Angaben', 'Vor dem Upload müssen alle Felder ausgefüllt/-wählt werden.', 'alert-danger');

@@ -1,4 +1,8 @@
 <?php
+
+//error_reporting(E_ALL); 
+//ini_set('display_errors', 1); 
+
     /*
         TODO::
         - improve mail notification (try to use media wiki or shell)
@@ -113,6 +117,7 @@
         
         # This is the function we want to change, because we want to define the destination folder by POST parameter
         public function handleChunk(){
+            #print_r($_FILES['file']);
             $file = $this->request->file();
             $identifier = $this->resumableParam('identifier');
             $filename = $this->resumableParam('filename');
@@ -120,10 +125,13 @@
             $chunkSize = $this->resumableParam('chunkSize');
             $totalSize = $this->resumableParam('totalSize');
             
-            #print("HandleChunk!");
+            if ($file['error'] == 0){
+                throw new Exception("Error: Unable to upload file (Error code ".$file['error'].")", E_WARNING);                
+            }
             
             if (!$this->isChunkUploaded($identifier, $filename, $chunkNumber)) {
                 $chunkFile = $this->tmpChunkDir($identifier) . DIRECTORY_SEPARATOR . $this->tmpChunkFilename($filename, $chunkNumber);
+                
                 $this->moveUploadedFile($file['tmp_name'], $chunkFile);
             }
             
