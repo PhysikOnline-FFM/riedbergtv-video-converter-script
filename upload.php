@@ -125,7 +125,7 @@
             $chunkSize = $this->resumableParam('chunkSize');
             $totalSize = $this->resumableParam('totalSize');
             
-            if ($file['error'] == 0){
+            if ($file['error'] != 0){
                 throw new Exception("Error: Unable to upload file (Error code ".$file['error'].")", E_WARNING);                
             }
             
