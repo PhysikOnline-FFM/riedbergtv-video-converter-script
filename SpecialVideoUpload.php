@@ -78,6 +78,10 @@ class SpecialVideoUpload extends SpecialPage {
 		<ul class="list-group" id="file-list"></ul>
 	</div>
 </div>
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
 
 HTML
 );

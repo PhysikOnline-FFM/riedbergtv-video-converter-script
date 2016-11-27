@@ -1,5 +1,5 @@
 $( document ).ready(function() {
-	
+	$('[data-toggle="popover"]').popover(); 
 	var allowed_filetarpathes = {},
 	upload_url = window.location.href.split('#', 1)[0],
 	showAlert = function(title, text, cssClass, parent){
@@ -128,46 +128,92 @@ $( document ).ready(function() {
     r.on('fileAdded', function(file, event){
         //progressBar.fileAdded();
 		var $template = 
-			$('<li class="list-group-item" id="'+file.uniqueIdentifier+'">' +
-				'<div class="row">'+
-                    '<div class="col-md-3 col-lg-2 pull-right text-right fileactions"><button class="btn btn-danger btn-sm rm"><span class="glyphicon glyphicon-remove"></span></button></div>'+
-					'<div class="col-md-4 col-lg-3"><label>Um was gehts?</label></div>'+
-					'<div class="col-md-5 col-lg-7 filetarpath"><select name="filetarpath" class="form-control"><option value="">Auswählen!</option></select></div>'+
-				'</div>' +
-                '<div class="row">'+
-					'<div class="col-md-4 col-lg-3"><label>Wiki-Seitentitel</label></div>'+
-					'<div class="col-md-8 col-lg-9 filewikititel"><input type="text" name="filewikititel" class="form-control" value="" maxlength="60" placeholder="z.B. Kurzinterview PhysikOnline"/></div>'+
-				'</div>' +
-                '<div class="row">'+
-					'<div class="col-md-4 col-lg-3"><label>Videotitel</label></div>'+
-					'<div class="col-md-8 col-lg-9 filevideotitel"><input type="text" name="filevideotitel" class="form-control" value="" maxlength="60" placeholder="z.B. Prof. Dr. Galileo Galilei"/></div>'+
-				'</div>' +
-                '<div class="row">'+
-					'<div class="col-md-4 col-lg-3"><label>Videountertitel</label></div>'+
-					'<div class="col-md-8 col-lg-9 filevideountertitel"><input type="text" name="filevideountertitel" class="form-control" value="" maxlength="60" placeholder="z.B. Sein zwei Planetensystem" /></div>'+
-				'</div>' +
-				'<div class="row">'+
-					'<div class="col-md-4 col-lg-3"><label>(Zielort-)Dateiname</label></div>'+
-					'<div class="col-md-8 col-lg-9 filename"><input type="text" name="filename" class="form-control" value="'+file.fileName+'" maxlength="80" /></div>'+
-				'</div>' +
-				'<div class="row">'+
-					'<div class="col-md-4 col-lg-3"><label>Zeitpunkt für Vorschaubild</label></div>'+
-					'<div class="col-md-8 col-lg-9 filethumbtime"><input type="text" name="filethumbtime" class="form-control" value="00:02:00" placeholder="hh:mm:ss" title="Jeweils zweistellig Stunde:Minute:Sekunde (hh:mm:ss)" pattern="[0-9]{2}\:[0-9]{2}\:[0-9]{2}" maxlength="8" /></div>'+
-				'</div>' +
-				'<div class="row">'+
-					'<div class="col-md-4 col-lg-3"><label>Dateigröße</label></div>'+
-					'<div class="col-md-8 col-lg-9 filesize"><span class="form-control-static">'+formatSize(file.size)+'</span></div>'+
-				'</div>' +
+			$('<li class="list-group-item" id="'+file.uniqueIdentifier+'">'
+                +'<div class="row">'
+                    +'<div class="col-md-3 col-lg-2 pull-right text-right fileactions">'
+                        +'<button class="btn btn-danger btn-sm rm"><span class="glyphicon glyphicon-remove"></span></button>'
+                    +'</div>'
+					+'<div class="col-md-4 col-lg-3">'
+                        +'<label>Um was gehts?</label>'
+                    +'</div>'
+					+'<div class="col-md-5 col-lg-7 filetarpath"><select name="filetarpath" class="form-control">'
+                        +'<option value="">Auswählen!</option></select>'
+                    +'</div>'
+				+'</div>'
+                +'<div class="row">'
+					+'<div class="col-md-4 col-lg-3">'
+                        +'<label>Wiki-Seitentitel</label>'
+                        +'<a href="#" class="upload-info-popup" data-toggle="popover" data-trigger="focus" data-content="Dies ist der Titel, der auf der Videoseite angezeigt wird.">'
+                            +'<i class="glyphicon glyphicon-info-sign"></i>'
+                        +'</a>'
+                    +'</div>'
+					+'<div class="col-md-8 col-lg-9 filewikititel">'
+                        +'<input type="text" name="filewikititel" class="form-control" value="" maxlength="60" placeholder="z.B. Kurzinterview PhysikOnline"/>'
+                    +'</div>'
+				+'</div>'
+                +'<div class="row">'
+					+'<div class="col-md-4 col-lg-3">'
+                        +'<label>Videotitel</label>'
+                        +'<a href="#" class="upload-info-popup" data-toggle="popover" data-trigger="focus" data-content="Dies ist der Titel, der auf der Hauptseite angezeigt wird.">'
+                            +'<i class="glyphicon glyphicon-info-sign"></i>'
+                        +'</a>'
+                    +'</div>'
+					+'<div class="col-md-8 col-lg-9 filevideotitel">'
+                        +'<input type="text" name="filevideotitel" class="form-control" value="" maxlength="60" placeholder="z.B. Prof. Dr. Galileo Galilei"/>'
+                +'</div>'
+				+'</div>' 
+                    +'<div class="row">'
+					+'<div class="col-md-4 col-lg-3">'
+                        +'<label>Videountertitel</label>'
+                        +'<a href="#" class="upload-info-popup" data-toggle="popover" data-trigger="focus" data-content="Dieser Titel wird unterhalb des Videotitels auf der Hauptseite angezeigt.">'
+                            +'<i class="glyphicon glyphicon-info-sign"></i>'
+                        +'</a>'
+                    +'</div>'
+					+'<div class="col-md-8 col-lg-9 filevideountertitel">'
+                        +'<input type="text" name="filevideountertitel" class="form-control" value="" maxlength="60" placeholder="z.B. Sein zwei Planetensystem" />'
+                    +'</div>'
+				+'</div>' 
+				+'<div class="row">'
+					+'<div class="col-md-4 col-lg-3">'
+                        +'<label>(Zielort-)Dateiname</label>'
+                    +'</div>'
+					+'<div class="col-md-8 col-lg-9 filename">'
+                        +'<input type="text" name="filename" class="form-control" value="'+file.fileName+'" maxlength="80" />'
+                    +'</div>'
+				+'</div>' 
+				+'<div class="row">'
+					+'<div class="col-md-4 col-lg-3">'
+                        +'<label>Zeitpunkt für Vorschaubild</label>'
+                        +'<a href="#" class="upload-info-popup" data-toggle="popover" data-trigger="focus" data-content="Nach dem Hochladen wird ein Bild an dieser Stelle aus dem Video extrahiert und als Thumbnail verwendet.">'
+                            +'<i class="glyphicon glyphicon-info-sign"></i>'
+                        +'</a>'
+                    +'</div>'
+					+'<div class="col-md-8 col-lg-9 filethumbtime">'
+                        +'<input type="text" name="filethumbtime" class="form-control" value="00:02:00" placeholder="hh:mm:ss" title="Jeweils zweistellig Stunde:Minute:Sekunde (hh:mm:ss)" pattern="[0-9]{2}\:[0-9]{2}\:[0-9]{2}" maxlength="8" />'
+                    +'</div>'
+				+'</div>' 
+				+'<div class="row">'
+					+'<div class="col-md-4 col-lg-3">'
+                        +'<label>Dateigröße</label>'
+                    +'</div>'
+					+'<div class="col-md-8 col-lg-9 filesize">'
+                        +'<span class="form-control-static">'+formatSize(file.size)+'</span>'
+                    +'</div>'
+				+'</div>' 
 				/*'<div class="row">'+
 					'<div class="col-md-4 col-lg-3"><label>Dateityp</label></div>'+
 					'<div class="col-md-8 col-lg-9 filetype"><span class="form-control-static">'+file.file.type+'</span></div>'+
 				'</div>' +*/
-				'<div class="progress fileprogressbar"><div class="progress-bar" role="progressbar" style="width: 0%;"></div></div>' +
-				'<div class="row">'+
-					'<div class="col-md-4 col-lg-3"><label></label></div>'+
-					'<div class="col-md-8 col-lg-9 videopreview"></div>'+
-				'</div>' +
-				'</li>');
+				+'<div class="progress fileprogressbar">'
+                    +'<div class="progress-bar" role="progressbar" style="width: 0%;"></div>'
+                +'</div>' 
+				+'<div class="row">'
+					+'<div class="col-md-4 col-lg-3">'
+                        +'<label></label>'
+                    +'</div>'
+					+'<div class="col-md-8 col-lg-9 videopreview"></div>'
+				+'</div>'
+				+'</li>');
 		// remove from list button
 		$template.find('.btn.rm').click(function(e){
 			var parent = $(this).parents('li.list-group-item'),
@@ -193,6 +239,7 @@ $( document ).ready(function() {
 			$select.append('<option value="'+v+'">'+k+'</option>');
 		});
 		$('#file-list').append($template);
+        $('[data-toggle="popover"]').popover(); 
         
         // add preview
         /* Wegen Fehler "Kein Video mit unterstützem Format" auskommentiert.
