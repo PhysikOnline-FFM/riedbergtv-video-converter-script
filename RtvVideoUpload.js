@@ -1,5 +1,4 @@
 $( document ).ready(function() {
-	$('[data-toggle="popover"]').popover(); 
 	var allowed_filetarpathes = {},
 	upload_url = window.location.href.split('#', 1)[0],
 	showAlert = function(title, text, cssClass, parent){
@@ -135,6 +134,9 @@ $( document ).ready(function() {
                     +'</div>'
 					+'<div class="col-md-4 col-lg-3">'
                         +'<label>Um was gehts?</label>'
+						+'<span class="upload-info-popup" data-toggle="tooltip" title="Dies ist nur der Name, der angelegt wird, nicht die spätere Kategorie.">'
+						    +'<i class="glyphicon glyphicon-info-sign"></i>'
+						+'</span>'
                     +'</div>'
 					+'<div class="col-md-5 col-lg-7 filetarpath"><select name="filetarpath" class="form-control">'
                         +'<option value="">Auswählen!</option></select>'
@@ -143,9 +145,9 @@ $( document ).ready(function() {
                 +'<div class="row">'
 					+'<div class="col-md-4 col-lg-3">'
                         +'<label>Wiki-Seitentitel</label>'
-                        +'<a href="#" class="upload-info-popup" data-toggle="popover" data-trigger="focus" data-content="Dies ist der Titel, der auf der Videoseite angezeigt wird.">'
+                        +'<span class="upload-info-popup" data-toggle="tooltip" title="Dies ist der Titel, der auf der Videoseite angezeigt wird.">'
                             +'<i class="glyphicon glyphicon-info-sign"></i>'
-                        +'</a>'
+                        +'</span>'
                     +'</div>'
 					+'<div class="col-md-8 col-lg-9 filewikititel">'
                         +'<input type="text" name="filewikititel" class="form-control" value="" maxlength="60" placeholder="z.B. Kurzinterview PhysikOnline"/>'
@@ -154,9 +156,9 @@ $( document ).ready(function() {
                 +'<div class="row">'
 					+'<div class="col-md-4 col-lg-3">'
                         +'<label>Videotitel</label>'
-                        +'<a href="#" class="upload-info-popup" data-toggle="popover" data-trigger="focus" data-content="Dies ist der Titel, der auf der Hauptseite angezeigt wird.">'
+                        +'<span class="upload-info-popup" data-toggle="tooltip" title="Dies ist der Titel, der auf der Hauptseite angezeigt wird.">'
                             +'<i class="glyphicon glyphicon-info-sign"></i>'
-                        +'</a>'
+                        +'</span>'
                     +'</div>'
 					+'<div class="col-md-8 col-lg-9 filevideotitel">'
                         +'<input type="text" name="filevideotitel" class="form-control" value="" maxlength="60" placeholder="z.B. Prof. Dr. Galileo Galilei"/>'
@@ -165,9 +167,9 @@ $( document ).ready(function() {
                     +'<div class="row">'
 					+'<div class="col-md-4 col-lg-3">'
                         +'<label>Videountertitel</label>'
-                        +'<a href="#" class="upload-info-popup" data-toggle="popover" data-trigger="focus" data-content="Dieser Titel wird unterhalb des Videotitels auf der Hauptseite angezeigt.">'
+                        +'<span class="upload-info-popup" data-toggle="tooltip" title="Dieser Titel wird unterhalb des Videotitels auf der Hauptseite angezeigt.">'
                             +'<i class="glyphicon glyphicon-info-sign"></i>'
-                        +'</a>'
+                        +'</span>'
                     +'</div>'
 					+'<div class="col-md-8 col-lg-9 filevideountertitel">'
                         +'<input type="text" name="filevideountertitel" class="form-control" value="" maxlength="60" placeholder="z.B. Sein zwei Planetensystem" />'
@@ -184,9 +186,9 @@ $( document ).ready(function() {
 				+'<div class="row">'
 					+'<div class="col-md-4 col-lg-3">'
                         +'<label>Zeitpunkt für Vorschaubild</label>'
-                        +'<a href="#" class="upload-info-popup" data-toggle="popover" data-trigger="focus" data-content="Nach dem Hochladen wird ein Bild an dieser Stelle aus dem Video extrahiert und als Thumbnail verwendet.">'
+                        +'<span class="upload-info-popup" data-toggle="tooltip" title="Nach dem Hochladen wird ein Bild an dieser Stelle aus dem Video extrahiert und als Thumbnail verwendet.">'
                             +'<i class="glyphicon glyphicon-info-sign"></i>'
-                        +'</a>'
+                        +'</span>'
                     +'</div>'
 					+'<div class="col-md-8 col-lg-9 filethumbtime">'
                         +'<input type="text" name="filethumbtime" class="form-control" value="00:02:00" placeholder="hh:mm:ss" title="Jeweils zweistellig Stunde:Minute:Sekunde (hh:mm:ss)" pattern="[0-9]{2}\:[0-9]{2}\:[0-9]{2}" maxlength="8" />'
@@ -239,7 +241,7 @@ $( document ).ready(function() {
 			$select.append('<option value="'+v+'">'+k+'</option>');
 		});
 		$('#file-list').append($template);
-        $('[data-toggle="popover"]').popover(); 
+        $('[data-toggle="tooltip"]').tooltip();
         
         // add preview
         /* Wegen Fehler "Kein Video mit unterstützem Format" auskommentiert.
