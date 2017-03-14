@@ -235,7 +235,7 @@ class RTVResumable extends Resumable
             $mail = isset( $usermail ) ? escapeshellarg( trim( strip_tags( $usermail ) ) ) : 'elearning@th.physik.uni-frankfurt.de';
             $logfile = escapeshellarg( $new_target_dir_abs . $subfolder4video . '.log' );
             $errlogs = escapeshellarg( $new_target_dir_abs . $subfolder4video . '.errors.log' );
-            $cmd = "./convert.sh -f '$filepathname_abs' -t '$new_target_dir_abs' -m '$mail' --no-convert -a '$wikipage_link' 1>'$logfile' 2>'$errlogs' &";
+            $cmd = "./convert.sh -f '$filepathname_abs' -t '$new_target_dir_abs' -m '$mail' -a '$wikipage_link' 1>'$logfile' 2>'$errlogs' &";
             $ret = exec( $cmd );
 
             // info an Nutzer

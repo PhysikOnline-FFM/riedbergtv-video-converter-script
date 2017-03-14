@@ -181,7 +181,7 @@ if [ "$do_sanity_check" = true ]; then
 fi
 
 if [ "$do_convert" = true ]; then
-    #convert_video
+    convert_video
     file_checks
 fi
 
