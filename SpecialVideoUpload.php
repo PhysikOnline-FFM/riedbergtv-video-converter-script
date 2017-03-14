@@ -45,7 +45,7 @@ class SpecialVideoUpload extends SpecialPage {
 		<h3>Browser wird nicht unterstützt</h3>
 		Dein Browser bietet nicht die notwendigen Funktionen, um diese Upload-Seite zu nutzen. Bitte probiere es mit Firefox oder Chrome.
 	</div>
-
+	<div class="alert alert-danger">Dies ist der Entwicklungsbranch der Uploadmaske, falls du nun ein Video hochladen möchtest, kontaktiere das IT-Team.</div>
 	<div class="col-sm-12">
 		<button type="button" class="btn btn-primary" aria-label="Add file" id="add-file-btn">
 			<span class="glyphicon glyphicon-file" aria-hidden="true"></span>&nbsp;
@@ -78,6 +78,10 @@ class SpecialVideoUpload extends SpecialPage {
 		<ul class="list-group" id="file-list"></ul>
 	</div>
 </div>
+<script
+  src="https://code.jquery.com/jquery-3.1.1.min.js"
+  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+  crossorigin="anonymous"></script>
 
 HTML
 );
