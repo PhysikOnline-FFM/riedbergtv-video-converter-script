@@ -175,7 +175,7 @@ class RTVResumable extends Resumable
             # Make sure there is a filename
             if ( strlen( $new_filename ) < 3 )
             {
-                $new_filename = date( "Y-m-d" ) . '_' . $new_filename;
+                $new_filename = date( "Y-m-d" ) . '_' . $new_filename
             }
             # File extension added later
             $filename_suffix = '.orig.mp4';
